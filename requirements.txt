@@ -1,0 +1,9 @@
+Django>=4.0
+djangorestframework
+psycopg2-binary
+pyresparser
+spacy
+scikit-learn
+pdfminer.six
+nltk
+pandas
