@@ -3,8 +3,11 @@ from users.models import CustomUser
 
 class Job(models.Model):
     recruiter = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
-    title = models.CharField(max_length=100)
+    title = models.CharField(max_length=200)
     description = models.TextField()
+    location = models.CharField(max_length=100)
     skills_required = models.TextField()
-    experience_required = models.IntegerField()
-    posted_at = models.DateTimeField(auto_now_add=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.title
