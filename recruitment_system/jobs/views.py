@@ -1,12 +1,23 @@
-from rest_framework.generics import ListCreateAPIView
-from rest_framework.permissions import IsAuthenticated
-from .models import Job
-from .serializers import JobSerializer
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from resumes.models import Resume
+from resumes.serializers import ResumeSerializer
+from .matcher import match_resumes_to_job
 
-class JobPostView(ListCreateAPIView):
-    queryset = Job.objects.all()
-    serializer_class = JobSerializer
+class MatchedResumesView(APIView):
     permission_classes = [IsAuthenticated]
 
-    def perform_create(self, serializer):
-        serializer.save(recruiter=self.request.user)
+    def get(self, request, job_id):
+        matches = match_resumes_to_job(job_id)
+        results = []
+
+        for resume_id, score in matches:
+            resume = Resume.objects.get(id=resume_id)
+            results.append({
+                "resume_id": resume.id,
+                "user": resume.user.username,
+                "match_score": round(score * 100, 2),
+                "parsed_data": resume.parsed_data
+            })
+
+        return Response(results)
