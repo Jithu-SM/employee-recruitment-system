@@ -5,7 +5,7 @@ class Job(models.Model):
     recruiter = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
     title = models.CharField(max_length=200)
     description = models.TextField()
-    location = models.CharField(max_length=100)
+    location = models.CharField(max_length=100, blank=True, null=True)
     skills_required = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
 
