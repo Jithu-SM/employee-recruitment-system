@@ -38,7 +38,10 @@ class MatchedResumesView(APIView):
         return Response(matched_resumes)
 
 
-class JobPostView(generics.CreateAPIView):
+class JobListCreateView(generics.ListCreateAPIView):
     queryset = Job.objects.all()
     serializer_class = JobSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [permissions.IsAuthenticated]  # Only logged-in users can post jobs
+
+    def perform_create(self, serializer):
+        serializer.save(recruiter=self.request.user)
