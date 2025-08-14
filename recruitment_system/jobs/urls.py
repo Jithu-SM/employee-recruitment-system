@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import JobPostView, MatchedResumesView, JobListCreateView
+from .views import MatchedResumesView, JobListCreateView
 
 urlpatterns = [
     path('', JobListCreateView.as_view(), name='job-list-create'),

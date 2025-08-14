@@ -26,4 +26,6 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/resumes/', include('resumes.urls')),
     path('api/jobs/', include('jobs.urls')),
+    path('api/applications/', include('applications.urls')),
+    path('api/auth/', include('rest_framework.urls')),  # DRF's built-in login
 ]

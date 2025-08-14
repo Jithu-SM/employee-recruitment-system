@@ -4,7 +4,7 @@ from rest_framework.permissions import IsAuthenticated
 from resumes.models import Resume
 from resumes.serializers import ResumeSerializer
 from .matcher import match_resumes_to_job
-from rest_framework import generics
+from rest_framework import generics, permissions
 from .models import Job
 from .serializers import JobSerializer
 from sklearn.feature_extraction.text import TfidfVectorizer

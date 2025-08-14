@@ -9,6 +9,3 @@ class CustomUser(AbstractUser):
     )
     user_type = models.CharField(max_length=10, choices=USER_TYPE_CHOICES)
 
-class User(AbstractUser):
-    # You can add extra fields if needed
-    pass
