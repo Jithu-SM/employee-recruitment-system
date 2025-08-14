@@ -8,3 +8,7 @@ class CustomUser(AbstractUser):
         ('admin', 'Admin'),
     )
     user_type = models.CharField(max_length=10, choices=USER_TYPE_CHOICES)
+
+class User(AbstractUser):
+    # You can add extra fields if needed
+    pass
