@@ -2,6 +2,12 @@
 
 This is an AI-powered recruitment system that automates resume parsing and matches candidates to job descriptions using Natural Language Processing (NLP) and Machine Learning (ML). The system is built using Django for the backend and React.js for the frontend.
 
+<div align="center">
+
+[![wakatime](https://wakatime.com/badge/user/e952d4d7-b591-4f25-9cc5-372f864cae94/project/df2f9293-2278-4594-8392-c00568fea153.svg)](https://wakatime.com/badge/user/e952d4d7-b591-4f25-9cc5-372f864cae94/project/df2f9293-2278-4594-8392-c00568fea153)
+
+</div>
+
 ## 🔧 Features
 
 ### Candidate
