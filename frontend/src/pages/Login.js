@@ -1,5 +1,6 @@
 import { useState } from "react";
 import axios from "axios";
+import "./Login.css";
 
 function Login() {
   const [username, setUsername] = useState("");
@@ -9,7 +10,8 @@ function Login() {
     e.preventDefault();
     try {
       const response = await axios.post("http://127.0.0.1:8000/api/token/", {
-        username, password
+        username,
+        password,
       });
       localStorage.setItem("token", response.data.access);
       alert("Login successful!");
@@ -19,9 +21,17 @@ function Login() {
   };
 
   return (
-    <form onSubmit={handleLogin}>
-      <input type="text" placeholder="Username" onChange={(e) => setUsername(e.target.value)} />
-      <input type="password" placeholder="Password" onChange={(e) => setPassword(e.target.value)} />
+    <form className="login-form" onSubmit={handleLogin}>
+      <input
+        type="text"
+        placeholder="Username"
+        onChange={(e) => setUsername(e.target.value)}
+      />
+      <input
+        type="password"
+        placeholder="Password"
+        onChange={(e) => setPassword(e.target.value)}
+      />
       <button type="submit">Login</button>
     </form>
   );
