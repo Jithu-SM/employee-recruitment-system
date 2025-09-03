@@ -10,19 +10,28 @@ class ResumeUploadView(APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request):
-        file = request.FILES.get('file')
-        if not file.name.endswith('.pdf'):
-            return Response({'error': 'Only PDF files are allowed.'}, status=400)
+        file = request.FILES.get("file")
+        if not file:
+            return Response({"error": "No file uploaded"}, status=400)
 
-        # Save file to user
+        # Save file to disk
         resume, created = Resume.objects.get_or_create(user=request.user)
         resume.file = file
         resume.save()
 
-        # Parse file
+        # Parse file from disk
         file_path = resume.file.path
         data = parse_resume(file_path)
         resume.parsed_data = data
         resume.save()
 
-        return Response({'message': 'Resume uploaded and parsed.', 'data': data})
+        return Response({"message": "Resume uploaded and parsed", "data": data})
+
+    def get(self, request):
+        resume = Resume.objects.filter(user=request.user).first()
+        if not resume:
+            return Response({'error': 'No resume found'}, status=404)
+        return Response({
+            'file': str(resume.file),
+            'parsed_data': resume.parsed_data
+        })

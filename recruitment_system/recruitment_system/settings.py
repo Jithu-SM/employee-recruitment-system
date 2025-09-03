@@ -41,9 +41,17 @@ INSTALLED_APPS = [
     'jobs',                         # job posting app
     'resumes',                      # resume upload app
     'rest_framework',
+    'rest_framework_simplejwt',
     'corsheaders',
     'applications',                 # application tracking app
 ]
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ),
+}
+
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',

@@ -1,11 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { fetchResume, fetchJobSuggestions, uploadResume } from "../services/api";
+import { useNavigate } from "react-router-dom";
 
 const Dashboard = () => {
   const [resume, setResume] = useState(null);
   const [jobs, setJobs] = useState([]);
   const [username, setUsername] = useState("");
   const [uploading, setUploading] = useState(false);
+  const navigate = useNavigate();
 
   // Decode JWT to get username
   useEffect(() => {
@@ -32,12 +34,11 @@ const Dashboard = () => {
     const file = e.target.resume.files[0];
     if (!file) return;
     const formData = new FormData();
-    formData.append("resume", file);
+    formData.append("file", file);
     setUploading(true);
     try {
       await uploadResume(formData);
       alert("Resume uploaded successfully!");
-      // Refresh resume data
       fetchResume()
         .then((res) => setResume(res.data))
         .catch((err) => console.error(err));
@@ -45,6 +46,12 @@ const Dashboard = () => {
       alert("Resume upload failed.");
     }
     setUploading(false);
+  };
+
+  // Logout handler
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    navigate("/login");
   };
 
   return (
@@ -61,17 +68,18 @@ const Dashboard = () => {
       </form>
 
       {/* Resume Section */}
-      {resume ? (
+      {resume && resume.parsed_data ? (
         <div className="resume-section">
           <h3>Your Resume Data</h3>
-          <p><b>Name:</b> {resume.parsed_data.name}</p>
-          <p><b>Skills:</b> {resume.parsed_data.skills.join(", ")}</p>
-          <p><b>Education:</b> {resume.parsed_data.education}</p>
-          <p><b>Experience:</b> {resume.parsed_data.experience}</p>
+          <p><b>Name:</b> {resume.parsed_data.name || "N/A"}</p>
+          <p><b>Skills:</b> {resume.parsed_data.skills?.join(", ") || "N/A"}</p>
+          <p><b>Education:</b> {resume.parsed_data.education || "N/A"}</p>
+          <p><b>Experience:</b> {resume.parsed_data.experience || "N/A"}</p>
         </div>
       ) : (
         <p>Upload your resume to see parsed details.</p>
       )}
+
 
       {/* Job Suggestions Section */}
       <div className="jobs-section">
@@ -89,6 +97,26 @@ const Dashboard = () => {
           <p>No job suggestions yet.</p>
         )}
       </div>
+
+      {/* Logout Button at the bottom */}
+      <button
+        style={{
+          marginTop: "2rem",
+          padding: "0.5rem 1.5rem",
+          background: "#dc3545",
+          color: "#fff",
+          border: "none",
+          borderRadius: "4px",
+          cursor: "pointer",
+          position: "fixed",
+          bottom: "30px",
+          left: "50%",
+          transform: "translateX(-50%)"
+        }}
+        onClick={handleLogout}
+      >
+        Logout
+      </button>
     </div>
   );
 };
