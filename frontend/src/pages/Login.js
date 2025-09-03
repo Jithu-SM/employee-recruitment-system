@@ -1,10 +1,12 @@
 import { useState } from "react";
 import axios from "axios";
 import "./Login.css";
+import { useNavigate } from "react-router-dom"; // Add this import
 
 function Login() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const navigate = useNavigate(); // Initialize navigate
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -15,6 +17,7 @@ function Login() {
       });
       localStorage.setItem("token", response.data.access);
       alert("Login successful!");
+      navigate("/dashboard"); // Redirect to candidate dashboard
     } catch (err) {
       alert("Invalid credentials");
     }

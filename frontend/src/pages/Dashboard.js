@@ -1,25 +1,64 @@
 import React, { useEffect, useState } from "react";
-import { fetchResume, fetchJobSuggestions } from "../services/api";
+import { fetchResume, fetchJobSuggestions, uploadResume } from "../services/api";
 
 const Dashboard = () => {
   const [resume, setResume] = useState(null);
   const [jobs, setJobs] = useState([]);
+  const [username, setUsername] = useState("");
+  const [uploading, setUploading] = useState(false);
+
+  // Decode JWT to get username
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (token) {
+      const payload = JSON.parse(atob(token.split(".")[1]));
+      setUsername(payload.username || payload.user_name || "");
+    }
+  }, []);
 
   useEffect(() => {
-    // Load parsed resume
     fetchResume()
       .then((res) => setResume(res.data))
       .catch((err) => console.error(err));
 
-    // Load job suggestions
     fetchJobSuggestions()
       .then((res) => setJobs(res.data))
       .catch((err) => console.error(err));
   }, []);
 
+  // Resume upload handler
+  const handleResumeUpload = async (e) => {
+    e.preventDefault();
+    const file = e.target.resume.files[0];
+    if (!file) return;
+    const formData = new FormData();
+    formData.append("resume", file);
+    setUploading(true);
+    try {
+      await uploadResume(formData);
+      alert("Resume uploaded successfully!");
+      // Refresh resume data
+      fetchResume()
+        .then((res) => setResume(res.data))
+        .catch((err) => console.error(err));
+    } catch {
+      alert("Resume upload failed.");
+    }
+    setUploading(false);
+  };
+
   return (
     <div className="dashboard">
       <h2>Candidate Dashboard</h2>
+      <p>Welcome, <b>{username}</b>!</p>
+
+      {/* Resume Upload */}
+      <form onSubmit={handleResumeUpload}>
+        <input type="file" name="resume" accept=".pdf,.doc,.docx" required />
+        <button type="submit" disabled={uploading}>
+          {uploading ? "Uploading..." : "Upload Resume"}
+        </button>
+      </form>
 
       {/* Resume Section */}
       {resume ? (
