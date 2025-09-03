@@ -1,12 +1,12 @@
 import axios from "axios";
 
 const API = axios.create({
-  baseURL: "http://127.0.0.1:8000/api/",  // Django backend base URL
+  baseURL: "http://127.0.0.1:8000/api/", // Django backend base URL
 });
 
 // Attach JWT token if available
 API.interceptors.request.use((config) => {
-  const token = localStorage.getItem("access_token");
+  const token = localStorage.getItem("token"); // Use consistent key
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
@@ -28,3 +28,9 @@ export const uploadResume = (formData) =>
 // Jobs
 export const fetchJobs = () => API.get("jobs/");
 export const applyJob = (data) => API.post("applications/", data);
+
+// Fetch parsed resume
+export const fetchResume = () => API.get("resumes/");
+
+// Fetch personalized job suggestions
+export const fetchJobSuggestions = () => API.get("jobs/suggestions/");

@@ -1,0 +1,10 @@
+.dashboard {
+  padding: 20px;
+}
+
+.resume-section, .jobs-section {
+  background: #f4f4f4;
+  padding: 15px;
+  margin: 10px 0;
+  border-radius: 8px;
+}
