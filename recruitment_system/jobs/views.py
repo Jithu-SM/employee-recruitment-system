@@ -10,7 +10,10 @@ from .serializers import JobSerializer
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 import json
+import traceback
+import logging
 
+logger = logging.getLogger(__name__)
 
 class MatchedResumesView(APIView):
     permission_classes = [IsAuthenticated]
@@ -52,53 +55,41 @@ class JobSuggestionsView(APIView):
 
     def get(self, request):
         try:
-            # Get the user's resume
             resume = Resume.objects.filter(user=request.user).first()
             if not resume or not resume.parsed_data:
-                return Response({"error": "No parsed resume found"}, status=400)
+                return Response({"error": "No resume data found. Please upload your resume."}, status=400)
 
-            # Extract candidate text from parsed resume
-            parsed_data = resume.parsed_data
-            candidate_text = " ".join([
-                " ".join(parsed_data.get("skills", [])),
-                parsed_data.get("education", ""),
-                parsed_data.get("experience", "")
-            ])
-
-            # Get all job descriptions
             jobs = Job.objects.all()
+            if not jobs.exists():
+                return Response({"error": "No jobs available."}, status=400)
+
+            resume_text = " ".join(resume.parsed_data.get("skills", []))
             job_texts = [job.description for job in jobs]
 
-            if not job_texts:
-                return Response({"error": "No jobs available"}, status=400)
+            if not resume_text.strip():
+                return Response({"error": "Resume has no skills data."}, status=400)
 
-            # TF-IDF + Cosine Similarity
+            corpus = [resume_text] + job_texts
             vectorizer = TfidfVectorizer()
-            tfidf_matrix = vectorizer.fit_transform([candidate_text] + job_texts)
+            tfidf_matrix = vectorizer.fit_transform(corpus)
             cosine_sim = cosine_similarity(tfidf_matrix[0:1], tfidf_matrix[1:]).flatten()
 
-            # Rank jobs by similarity
-            ranked_jobs = sorted(
-                zip(jobs, cosine_sim),
-                key=lambda x: x[1],
-                reverse=True
-            )
-
-            # Return top 5 jobs (or all if fewer)
-            results = [
-                {
+            job_suggestions = []
+            for job, score in zip(jobs, cosine_sim):
+                job_suggestions.append({
                     "id": job.id,
                     "title": job.title,
                     "company": job.company,
                     "description": job.description,
-                    "similarity_score": float(score)
-                }
-                for job, score in ranked_jobs[:5]
-            ]
+                    "score": float(score)
+                })
 
-            return Response(results, status=200)
+            job_suggestions = sorted(job_suggestions, key=lambda x: x["score"], reverse=True)
+
+            return Response(job_suggestions)
 
         except Exception as e:
+            logger.error("Error in JobSuggestionsView: %s", traceback.format_exc())
             return Response({"error": str(e)}, status=500)
 
 class JobPostView(generics.CreateAPIView):
