@@ -30,7 +30,16 @@ export const uploadResume = (formData) =>
 
 // Jobs
 export const fetchJobs = () => API.get("jobs/");
-export const applyJob = (data) => API.post("applications/", data);
+
+//apply job
+const API_BASE = "http://127.0.0.1:8000/api";
+const authHeaders = () => {
+  const token = localStorage.getItem("token");
+  return { Authorization: token ? `Bearer ${token}` : "" };
+};
+
+export const applyJob = (jobId) =>
+  axios.post(`${API_BASE}/applications/${jobId}/apply/`, {}, { headers: authHeaders() });
 
 // Fetch parsed resume
 export const fetchResume = () => API.get("resumes/");

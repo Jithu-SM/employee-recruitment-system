@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { fetchResume, fetchJobSuggestions, uploadResume } from "../services/api";
 import { useNavigate } from "react-router-dom";
+import "./styles/Dashboard.css";  // Import external stylesheet
+import { applyJob } from "../services/api";
 
 const Dashboard = () => {
   const [resume, setResume] = useState(null);
@@ -54,13 +56,28 @@ const Dashboard = () => {
     navigate("/login");
   };
 
+  // Apply button handler (to be connected with backend later)
+  const handleApply = async (jobId) => {
+  try {
+    const res = await applyJob(jobId);
+    alert(res.data.message);
+  } catch (err) {
+    if (err.response?.data?.message) {
+      alert(err.response.data.message);
+    } else {
+      alert("Application failed.");
+    }
+  }
+};
+
+
   return (
     <div className="dashboard">
       <h2>Candidate Dashboard</h2>
       <p>Welcome, <b>{username}</b>!</p>
 
       {/* Resume Upload */}
-      <form onSubmit={handleResumeUpload}>
+      <form onSubmit={handleResumeUpload} className="resume-upload">
         <input type="file" name="resume" accept=".pdf,.doc,.docx" required />
         <button type="submit" disabled={uploading}>
           {uploading ? "Uploading..." : "Upload Resume"}
@@ -69,7 +86,7 @@ const Dashboard = () => {
 
       {/* Resume Section */}
       {resume && resume.parsed_data ? (
-        <div className="resume-section">
+        <div className="resume-section card">
           <h3>Your Resume Data</h3>
           <p><b>Name:</b> {resume.parsed_data.name || "N/A"}</p>
           <p><b>Skills:</b> {resume.parsed_data.skills?.join(", ") || "N/A"}</p>
@@ -80,16 +97,23 @@ const Dashboard = () => {
         <p>Upload your resume to see parsed details.</p>
       )}
 
-
       {/* Job Suggestions Section */}
       <div className="jobs-section">
         <h3>Recommended Jobs</h3>
         {jobs.length > 0 ? (
-          <ul>
+          <ul className="job-list">
             {jobs.map((job) => (
-              <li key={job.id}>
-                <b>{job.title}</b> - {job.company}
-                <p>{job.description.slice(0, 100)}...</p>
+              <li key={job.id} className="job-card">
+                <div className="job-info">
+                  <b>{job.title}</b> - {job.company}
+                  <p>{job.description.slice(0, 100)}...</p>
+                </div>
+                <button
+                  className="apply-btn"
+                  onClick={() => handleApply(job.id)}
+                >
+                  Apply
+                </button>
               </li>
             ))}
           </ul>
@@ -98,23 +122,8 @@ const Dashboard = () => {
         )}
       </div>
 
-      {/* Logout Button at the bottom */}
-      <button
-        style={{
-          marginTop: "2rem",
-          padding: "0.5rem 1.5rem",
-          background: "#dc3545",
-          color: "#fff",
-          border: "none",
-          borderRadius: "4px",
-          cursor: "pointer",
-          position: "fixed",
-          bottom: "30px",
-          left: "50%",
-          transform: "translateX(-50%)"
-        }}
-        onClick={handleLogout}
-      >
+      {/* Logout Button */}
+      <button className="logout-btn" onClick={handleLogout}>
         Logout
       </button>
     </div>
