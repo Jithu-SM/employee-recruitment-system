@@ -1,7 +1,8 @@
 import axios from "axios";
 
+// Base API instance with JWT support
 const API = axios.create({
-  baseURL: "http://127.0.0.1:8000/api/", // Django backend base URL
+  baseURL: "http://127.0.0.1:8000/api/",
 });
 
 // Attach token to every request
@@ -13,45 +14,35 @@ API.interceptors.request.use((config) => {
   return config;
 });
 
-
-export default API;
-
+// =========================
 // Auth
+// =========================
 export const loginUser = (data) => API.post("token/", data);
 export const registerUser = (data) => API.post("register/", data);
 
+// =========================
 // Resumes
+// =========================
 export const uploadResume = (formData) =>
   API.post("resumes/", formData, {
-    headers: {
-      "Content-Type": "multipart/form-data",
-    },
+    headers: { "Content-Type": "multipart/form-data" },
   });
 
-// Jobs
-export const fetchJobs = () => API.get("jobs/");
-
-//apply job
-const API_BASE = "http://127.0.0.1:8000/api";
-const authHeaders = () => {
-  const token = localStorage.getItem("token");
-  return { Authorization: token ? `Bearer ${token}` : "" };
-};
-
-export const applyJob = (jobId) =>
-  axios.post(`${API_BASE}/applications/${jobId}/apply/`, {}, { headers: authHeaders() });
-
-// Fetch parsed resume
 export const fetchResume = () => API.get("resumes/");
 
-// Fetch personalized job suggestions
+// =========================
+// Jobs
+// =========================
+export const fetchJobs = () => API.get("jobs/");
 export const fetchJobSuggestions = () => API.get("jobs/suggestions/");
+export const fetchRecruiterJobs = () => API.get("jobs/recruiter/");
+export const postJob = (jobData) => API.post("jobs/recruiter/", jobData);
 
-export const fetchRecruiterJobs = () =>
-  axios.get(`${API_BASE}/jobs/recruiter/`, { headers: authHeaders() });
+// =========================
+// Applications
+// =========================
+export const applyJob = (jobId) => API.post(`applications/${jobId}/apply/`);
 
-export const postJob = (jobData) =>
-  axios.post(`${API_BASE}/jobs/recruiter/`, jobData, { headers: authHeaders() });
-
+// 🔹 FIX: applicants by job route
 export const fetchApplicants = (jobId) =>
-  axios.get(`${API_BASE}/applications/${jobId}/`, { headers: authHeaders() });
+  API.get(`applications/job/${jobId}/`);

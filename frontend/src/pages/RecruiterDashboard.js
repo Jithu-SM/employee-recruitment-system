@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
-import { fetchRecruiterJobs, postJob, fetchApplicants } from "../services/api";
 import { useNavigate } from "react-router-dom";
 import "./styles/RecruiterDashboard.css";
+import { fetchRecruiterJobs, postJob, fetchApplicants } from "../services/api";
 
 const RecruiterDashboard = () => {
   const [jobs, setJobs] = useState([]);
@@ -35,10 +35,19 @@ const RecruiterDashboard = () => {
   const handleViewApplicants = async (jobId) => {
     try {
       const res = await fetchApplicants(jobId);
-      setApplicants(res.data);
+
+      // Ensure applicants is always an array
+      if (Array.isArray(res.data)) {
+        setApplicants(res.data);
+      } else if (res.data && typeof res.data === "object") {
+        setApplicants([res.data]);
+      } else {
+        setApplicants([]);
+      }
+
       setShowApplicants(jobId);
     } catch {
-      alert("❌ Could not fetch applicants.");
+      alert("Could not fetch applicants.");
     }
   };
 
@@ -106,15 +115,18 @@ const RecruiterDashboard = () => {
       {showApplicants && (
         <div className="applicants-section">
           <h3>Applicants for Job #{showApplicants}</h3>
-          <div className="applicants-list">
-            {applicants.map((app) => (
-              <div key={app.id} className="applicant-card">
-                <b>{app.user.username}</b>
-                <p>Match: {app.match_score || "N/A"}%</p>
-                <p>Status: {app.status}</p>
-              </div>
-            ))}
-          </div>
+          {Array.isArray(applicants) && applicants.length > 0 ? (
+            <ul>
+              {applicants.map((app) => (
+                <li key={app.id}>
+                  <b>{app.user?.username || "Unknown"}</b> - Match: {app.match_score || "N/A"}%
+                  <p>Status: {app.status}</p>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p>No applicants yet.</p>
+          )}
         </div>
       )}
 

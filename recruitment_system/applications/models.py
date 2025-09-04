@@ -8,8 +8,14 @@ class Application(models.Model):
     job = models.ForeignKey(Job, on_delete=models.CASCADE, related_name='applications')
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     resume = models.ForeignKey(Resume, on_delete=models.SET_NULL, null=True, blank=True)
-    status = models.CharField(max_length=50, default='Pending')  # Pending, Accepted, Rejected
-    applied_at = models.DateTimeField(auto_now_add=True)
+    status = models.CharField(
+        max_length=20,
+        choices=[("Pending", "Pending"), ("Accepted", "Accepted"), ("Rejected", "Rejected")],
+        default="Pending"
+    )
+    match_score = models.IntegerField(default=0)  # ✅ NEW FIELD
+    created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"{self.user.username} applied for {self.job.title}"
+        return f"{self.user.username} -> {self.job.title}"
+

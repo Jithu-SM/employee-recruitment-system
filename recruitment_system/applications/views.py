@@ -4,6 +4,10 @@ from rest_framework.permissions import IsAuthenticated
 from .models import Application
 from .serializers import ApplicationSerializer
 from jobs.models import Job
+from rest_framework import generics, permissions
+from resumes.models import Resume
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.metrics.pairwise import cosine_similarity
 
 class ApplicationCreateView(APIView):
     permission_classes = [IsAuthenticated]
@@ -15,30 +19,47 @@ class ApplicationCreateView(APIView):
             return Response(serializer.data, status=201)
         return Response(serializer.errors, status=400)
 
+
 class ApplicationListView(APIView):
     permission_classes = [IsAuthenticated]
 
-    def get(self, request):
-        applications = Application.objects.filter(user=request.user)
+    def get(self, request, job_id):
+        applications = Application.objects.filter(job_id=job_id)
         serializer = ApplicationSerializer(applications, many=True)
         return Response(serializer.data)
+
 
 class ApplyJobView(APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request, job_id):
-        try:
-            job = Job.objects.get(id=job_id)
-            application, created = Application.objects.get_or_create(
-                user=request.user,
-                job=job
-            )
-            if not created:
-                return Response({"message": "Already applied to this job"}, status=400)
+        job = Job.objects.get(id=job_id)
+        resume = Resume.objects.filter(user=request.user).first()
 
-            return Response({"message": "Application submitted successfully"}, status=201)
-        except Job.DoesNotExist:
-            return Response({"error": "Job not found"}, status=404)
+        if not resume:
+            return Response({"error": "Upload your resume first"}, status=400)
+
+        # --- Calculate match score (basic TF-IDF on skills + description) ---
+        job_text = f"{job.title} {job.description} {job.skills_required}"
+        resume_text = " ".join(resume.parsed_data.get("skills", []))
+
+        vectorizer = TfidfVectorizer().fit([job_text, resume_text])
+        vectors = vectorizer.transform([job_text, resume_text])
+        similarity = cosine_similarity(vectors[0], vectors[1])[0][0]
+        match_score = round(similarity * 100)
+
+        # --- Create application ---
+        application, created = Application.objects.get_or_create(
+            user=request.user,
+            job=job,
+            defaults={"match_score": match_score}
+        )
+
+        if not created:
+            return Response({"message": "Already applied"}, status=400)
+
+        return Response({"message": "Applied successfully", "match_score": match_score})
+
 
 
 class JobApplicantsView(APIView):
@@ -52,3 +73,18 @@ class JobApplicantsView(APIView):
         except Job.DoesNotExist:
             return Response({"error": "Job not found or not owned by you"}, status=404)
 
+
+# View a single application by ID
+class ApplicationDetailView(generics.RetrieveUpdateAPIView):
+    queryset = Application.objects.all()
+    serializer_class = ApplicationSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+
+class JobApplicationsView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, job_id):
+        applications = Application.objects.filter(job_id=job_id)
+        serializer = ApplicationSerializer(applications, many=True)
+        return Response(serializer.data)
