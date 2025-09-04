@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import "./styles/Dashboard.css";  // Import external stylesheet
 import { applyJob } from "../services/api";
 
-const Dashboard = () => {
+const CandidateDashboard = () => {
   const [resume, setResume] = useState(null);
   const [jobs, setJobs] = useState([]);
   const [username, setUsername] = useState("");
@@ -130,4 +130,4 @@ const Dashboard = () => {
   );
 };
 
-export default Dashboard;
+export default CandidateDashboard;

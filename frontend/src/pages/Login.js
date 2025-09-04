@@ -1,42 +1,53 @@
-import { useState } from "react";
-import axios from "axios";
+// import { useState } from "react";
+// import axios from "axios";
 import "./styles/Login.css";
 import { useNavigate } from "react-router-dom"; // Add this import
 
-function Login() {
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
-  const navigate = useNavigate(); // Initialize navigate
+const Login = () => {
+  const navigate = useNavigate();
 
   const handleLogin = async (e) => {
     e.preventDefault();
+    const username = e.target.username.value;
+    const password = e.target.password.value;
+
     try {
-      const response = await axios.post("http://127.0.0.1:8000/api/token/", {
-        username,
-        password,
+      const res = await fetch("http://127.0.0.1:8000/api/token/", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username, password }),
       });
-      localStorage.setItem("token", response.data.access);
-      alert("Login successful!");
-      navigate("/dashboard"); // Redirect to candidate dashboard
+      const data = await res.json();
+
+      if (data.access) {
+        localStorage.setItem("token", data.access);
+
+        // Decode JWT to check role
+        const payload = JSON.parse(atob(data.access.split(".")[1]));
+        if (payload.user_type === "recruiter") {
+          navigate("/recruiter-dashboard");
+        } else if (payload.user_type === "candidate") {
+          navigate("/candidate-dashboard");
+        } else if (payload.user_type === "admin") {
+          navigate("/admin-dashboard"); // optional
+        } else {
+          navigate("/login"); // fallback
+        }
+      } else {
+        alert("Invalid credentials");
+      }
     } catch (err) {
-      alert("Invalid credentials");
+      alert("Login failed");
     }
   };
 
   return (
-    <form className="login-form" onSubmit={handleLogin}>
-      <input
-        type="text"
-        placeholder="Username"
-        onChange={(e) => setUsername(e.target.value)}
-      />
-      <input
-        type="password"
-        placeholder="Password"
-        onChange={(e) => setPassword(e.target.value)}
-      />
+    <form onSubmit={handleLogin}>
+      <input type="text" name="username" placeholder="Username" required />
+      <input type="password" name="password" placeholder="Password" required />
       <button type="submit">Login</button>
     </form>
   );
-}
+};
+
 export default Login;

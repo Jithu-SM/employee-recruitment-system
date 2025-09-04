@@ -46,3 +46,12 @@ export const fetchResume = () => API.get("resumes/");
 
 // Fetch personalized job suggestions
 export const fetchJobSuggestions = () => API.get("jobs/suggestions/");
+
+export const fetchRecruiterJobs = () =>
+  axios.get(`${API_BASE}/jobs/recruiter/`, { headers: authHeaders() });
+
+export const postJob = (jobData) =>
+  axios.post(`${API_BASE}/jobs/recruiter/`, jobData, { headers: authHeaders() });
+
+export const fetchApplicants = (jobId) =>
+  axios.get(`${API_BASE}/applications/${jobId}/`, { headers: authHeaders() });

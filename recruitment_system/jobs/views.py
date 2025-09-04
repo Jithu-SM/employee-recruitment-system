@@ -96,3 +96,18 @@ class JobPostView(generics.CreateAPIView):
     queryset = Job.objects.all()
     serializer_class = JobSerializer
     permission_classes = [IsAuthenticated]
+
+
+class RecruiterJobsView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        jobs = Job.objects.filter(posted_by=request.user)
+        return Response(JobSerializer(jobs, many=True).data)
+
+    def post(self, request):
+        serializer = JobSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save(posted_by=request.user)
+            return Response(serializer.data, status=201)
+        return Response(serializer.errors, status=400)

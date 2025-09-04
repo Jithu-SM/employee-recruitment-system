@@ -41,3 +41,14 @@ class ApplyJobView(APIView):
             return Response({"error": "Job not found"}, status=404)
 
 
+class JobApplicantsView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, job_id):
+        try:
+            job = Job.objects.get(id=job_id, posted_by=request.user)
+            applications = Application.objects.filter(job=job).order_by('-match_score')
+            return Response(ApplicationSerializer(applications, many=True).data)
+        except Job.DoesNotExist:
+            return Response({"error": "Job not found or not owned by you"}, status=404)
+

@@ -18,6 +18,7 @@ from django.contrib import admin
 from django.urls import path, include
 from django.http import HttpResponse
 from rest_framework_simplejwt.views import TokenObtainPairView
+from users.views import CustomTokenObtainPairView
 
 def home(request):
     return HttpResponse("Welcome to the AI Recruitment System Backend")
@@ -30,5 +31,5 @@ urlpatterns = [
     path('api/applications/', include('applications.urls')),
     path('api/auth/', include('rest_framework.urls')),  # DRF's built-in login
     path('api/', include('users.urls')),
-    path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
+    path('api/token/', CustomTokenObtainPairView.as_view(), name='token_obtain_pair'),
 ]
