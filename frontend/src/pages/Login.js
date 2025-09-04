@@ -1,7 +1,5 @@
-// import { useState } from "react";
-// import axios from "axios";
 import "./styles/Login.css";
-import { useNavigate } from "react-router-dom"; // Add this import
+import { useNavigate } from "react-router-dom";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -29,9 +27,9 @@ const Login = () => {
         } else if (payload.user_type === "candidate") {
           navigate("/candidate-dashboard");
         } else if (payload.user_type === "admin") {
-          navigate("/admin-dashboard"); // optional
+          navigate("/admin-dashboard");
         } else {
-          navigate("/login"); // fallback
+          navigate("/login");
         }
       } else {
         alert("Invalid credentials");
@@ -42,11 +40,21 @@ const Login = () => {
   };
 
   return (
-    <form onSubmit={handleLogin}>
-      <input type="text" name="username" placeholder="Username" required />
-      <input type="password" name="password" placeholder="Password" required />
-      <button type="submit">Login</button>
-    </form>
+    <div className="login-container">
+      <h2>Login</h2>
+      <form onSubmit={handleLogin} className="login-form">
+        <input type="text" name="username" placeholder="Username" required />
+        <input type="password" name="password" placeholder="Password" required />
+        <button type="submit" className="login-btn">Login</button>
+      </form>
+
+      <button
+        className="register-btn"
+        onClick={() => navigate("/register")}
+      >
+        Go to Register
+      </button>
+    </div>
   );
 };
 
