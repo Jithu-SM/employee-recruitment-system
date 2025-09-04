@@ -1,12 +1,19 @@
 import React, { useEffect, useState } from "react";
 import { fetchRecruiterJobs, postJob, fetchApplicants } from "../services/api";
 import { useNavigate } from "react-router-dom";
+import "./styles/RecruiterDashboard.css";
 
 const RecruiterDashboard = () => {
   const [jobs, setJobs] = useState([]);
   const [applicants, setApplicants] = useState([]);
   const [showApplicants, setShowApplicants] = useState(null);
-  const [newJob, setNewJob] = useState({ title: "", description: "" });
+  const [newJob, setNewJob] = useState({
+    title: "",
+    description: "",
+    company: "",
+    location: "",
+    skills_required: ""
+  });
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -17,11 +24,11 @@ const RecruiterDashboard = () => {
     e.preventDefault();
     try {
       await postJob(newJob);
-      alert("Job posted!");
-      setNewJob({ title: "", description: "" });
+      alert("✅ Job posted!");
+      setNewJob({ title: "", description: "", company: "", location: "", skills_required: "" });
       fetchRecruiterJobs().then(res => setJobs(res.data));
     } catch {
-      alert("Failed to post job.");
+      alert("❌ Failed to post job.");
     }
   };
 
@@ -31,7 +38,7 @@ const RecruiterDashboard = () => {
       setApplicants(res.data);
       setShowApplicants(jobId);
     } catch {
-      alert("Could not fetch applicants.");
+      alert("❌ Could not fetch applicants.");
     }
   };
 
@@ -45,7 +52,7 @@ const RecruiterDashboard = () => {
       <h2>Recruiter Dashboard</h2>
 
       {/* Job Posting Form */}
-      <form onSubmit={handlePostJob}>
+      <form className="job-form" onSubmit={handlePostJob}>
         <input
           type="text"
           placeholder="Job Title"
@@ -53,58 +60,66 @@ const RecruiterDashboard = () => {
           onChange={(e) => setNewJob({ ...newJob, title: e.target.value })}
           required
         />
+        <input
+          type="text"
+          placeholder="Company"
+          value={newJob.company}
+          onChange={(e) => setNewJob({ ...newJob, company: e.target.value })}
+        />
+        <input
+          type="text"
+          placeholder="Location"
+          value={newJob.location}
+          onChange={(e) => setNewJob({ ...newJob, location: e.target.value })}
+        />
         <textarea
           placeholder="Job Description"
           value={newJob.description}
           onChange={(e) => setNewJob({ ...newJob, description: e.target.value })}
           required
         />
+        <input
+          type="text"
+          placeholder="Required Skills (comma separated)"
+          value={newJob.skills_required}
+          onChange={(e) => setNewJob({ ...newJob, skills_required: e.target.value })}
+        />
         <button type="submit">Post Job</button>
       </form>
 
       {/* Posted Jobs */}
       <h3>Your Jobs</h3>
-      <ul>
+      <div className="jobs-list">
         {jobs.map((job) => (
-          <li key={job.id}>
-            <b>{job.title}</b>
+          <div key={job.id} className="job-card">
+            <h4>{job.title}</h4>
+            <p><b>Company:</b> {job.company || "N/A"}</p>
+            <p><b>Location:</b> {job.location || "Remote"}</p>
+            <p>{job.description.slice(0, 120)}...</p>
+            <p><b>Skills:</b> {job.skills_required}</p>
             <button onClick={() => handleViewApplicants(job.id)}>View Applicants</button>
-          </li>
+          </div>
         ))}
-      </ul>
+      </div>
 
       {/* Applicants Section */}
       {showApplicants && (
         <div className="applicants-section">
           <h3>Applicants for Job #{showApplicants}</h3>
-          <ul>
+          <div className="applicants-list">
             {applicants.map((app) => (
-              <li key={app.id}>
-                <b>{app.user.username}</b> - Match: {app.match_score}%
+              <div key={app.id} className="applicant-card">
+                <b>{app.user.username}</b>
+                <p>Match: {app.match_score || "N/A"}%</p>
                 <p>Status: {app.status}</p>
-              </li>
+              </div>
             ))}
-          </ul>
+          </div>
         </div>
       )}
 
       {/* Logout Button */}
-      <button
-        style={{
-          marginTop: "2rem",
-          padding: "0.5rem 1.5rem",
-          background: "#dc3545",
-          color: "#fff",
-          border: "none",
-          borderRadius: "4px",
-          cursor: "pointer",
-          position: "fixed",
-          bottom: "30px",
-          left: "50%",
-          transform: "translateX(-50%)"
-        }}
-        onClick={handleLogout}
-      >
+      <button className="logout-btn" onClick={handleLogout}>
         Logout
       </button>
     </div>

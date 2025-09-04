@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { fetchResume, fetchJobSuggestions, uploadResume } from "../services/api";
 import { useNavigate } from "react-router-dom";
-import "./styles/Dashboard.css";  // Import external stylesheet
+import "./styles/CandidateDashboard.css";  // Import external stylesheet
 import { applyJob } from "../services/api";
 
 const CandidateDashboard = () => {
