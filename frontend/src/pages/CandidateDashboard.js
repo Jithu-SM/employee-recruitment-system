@@ -1,14 +1,15 @@
 import React, { useEffect, useState } from "react";
-import { fetchResume, fetchJobSuggestions, uploadResume } from "../services/api";
+import { fetchResume, fetchJobSuggestions, uploadResume, applyJob } from "../services/api";
 import { useNavigate } from "react-router-dom";
-import "./styles/CandidateDashboard.css";  // Import external stylesheet
-import { applyJob } from "../services/api";
+import "./styles/CandidateDashboard.css";
 
 const CandidateDashboard = () => {
   const [resume, setResume] = useState(null);
   const [jobs, setJobs] = useState([]);
+  const [appliedJobs, setAppliedJobs] = useState([]); // track applied jobs
   const [username, setUsername] = useState("");
   const [uploading, setUploading] = useState(false);
+  const [searchQuery, setSearchQuery] = useState(""); // search bar state
   const navigate = useNavigate();
 
   // Decode JWT to get username
@@ -50,26 +51,40 @@ const CandidateDashboard = () => {
     setUploading(false);
   };
 
+  // Apply button handler
+  const handleApply = async (jobId) => {
+  try {
+    const res = await applyJob(jobId);
+    alert(res.data.message);
+
+    // Update job list marking job as applied
+    setJobs(jobs.map(job =>
+      job.id === jobId ? { ...job, applied: true } : job
+    ));
+  } catch (err) {
+    if (err.response?.data?.message === "Already applied") {
+      // Mark it applied if backend says so
+      setJobs(jobs.map(job =>
+        job.id === jobId ? { ...job, applied: true } : job
+      ));
+    }
+    alert(err.response?.data?.message || "Application failed.");
+  }
+};
+
   // Logout handler
   const handleLogout = () => {
     localStorage.removeItem("token");
     navigate("/login");
   };
 
-  // Apply button handler (to be connected with backend later)
-  const handleApply = async (jobId) => {
-  try {
-    const res = await applyJob(jobId);
-    alert(res.data.message);
-  } catch (err) {
-    if (err.response?.data?.message) {
-      alert(err.response.data.message);
-    } else {
-      alert("Application failed.");
-    }
-  }
-};
-
+  // Filter jobs based on search
+  const filteredJobs = jobs.filter(
+    (job) =>
+      job.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      job.company?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      job.skills_required?.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   return (
     <div className="dashboard">
@@ -100,25 +115,43 @@ const CandidateDashboard = () => {
       {/* Job Suggestions Section */}
       <div className="jobs-section">
         <h3>Recommended Jobs</h3>
-        {jobs.length > 0 ? (
+
+        {/* Search bar */}
+        <input
+          type="text"
+          placeholder="Search jobs by title, company, or skills..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="job-search"
+        />
+
+        {filteredJobs.length > 0 ? (
           <ul className="job-list">
-            {jobs.map((job) => (
+            {filteredJobs.map((job) => (
               <li key={job.id} className="job-card">
                 <div className="job-info">
                   <b>{job.title}</b> - {job.company}
                   <p>{job.description.slice(0, 100)}...</p>
                 </div>
-                <button
-                  className="apply-btn"
-                  onClick={() => handleApply(job.id)}
-                >
-                  Apply
-                </button>
+
+                {appliedJobs.includes(job.id) ? (
+                  <button className="applied-btn" disabled>
+                    ✅ Applied
+                  </button>
+                ) : (
+                  <button
+                    className={`apply-btn ${job.applied ? "applied" : ""}`}
+                    onClick={() => handleApply(job.id)}
+                    disabled={job.applied}   // disable if already applied
+                  >
+                    {job.applied ? "Applied" : "Apply"}
+                  </button>
+                )}
               </li>
             ))}
           </ul>
         ) : (
-          <p>No job suggestions yet.</p>
+          <p>No job suggestions match your search.</p>
         )}
       </div>
 
