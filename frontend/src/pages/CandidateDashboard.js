@@ -130,8 +130,10 @@ const CandidateDashboard = () => {
             {filteredJobs.map((job) => (
               <li key={job.id} className="job-card">
                 <div className="job-info">
-                  <b>{job.title}</b> - {job.company}
-                  <p>{job.description.slice(0, 100)}...</p>
+                  <h4>{job.title}</h4>
+                  <p><b>Company:</b> {job.company || "N/A"}</p>
+                  <p><b>Location:</b> {job.location || "Remote"}</p>
+                  <p>{job.description.slice(0, 150)}...</p>
                 </div>
 
                 {appliedJobs.includes(job.id) ? (
@@ -142,10 +144,11 @@ const CandidateDashboard = () => {
                   <button
                     className={`apply-btn ${job.applied ? "applied" : ""}`}
                     onClick={() => handleApply(job.id)}
-                    disabled={job.applied}   // disable if already applied
+                    disabled={job.applied}
                   >
-                    {job.applied ? "Applied" : "Apply"}
-                  </button>
+                  {job.applied ? "Applied" : "Apply"}
+                </button>
+
                 )}
               </li>
             ))}

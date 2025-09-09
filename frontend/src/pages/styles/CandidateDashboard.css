@@ -45,10 +45,20 @@ h2 {
   flex-direction: column;
   justify-content: space-between;
   box-shadow: 0 3px 5px rgba(0,0,0,0.1);
+  margin-bottom: 15px;
+  box-shadow: 0px 2px 5px rgba(0,0,0,0.1);
+  align-items: flex-start;
 }
 
 .job-info {
+  flex: 1;
+  margin-right: 10px;
   margin-bottom: 1rem;
+}
+
+.job-info h4 {
+  margin: 0 0 8px;
+  color: #2c3e50;
 }
 
 .job-search {
@@ -68,6 +78,13 @@ h2 {
   border-radius: 5px;
   cursor: pointer;
   transition: background 0.2s;
+  font-weight: bold;
+  transition: 0.3s;
+
+}
+
+.apply-btn:hover {
+  background: #0056b3;
 }
 
 .apply-btn:hover:not(:disabled) {

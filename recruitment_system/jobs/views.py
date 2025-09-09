@@ -12,6 +12,8 @@ from sklearn.metrics.pairwise import cosine_similarity
 import json
 import traceback
 import logging
+from applications.models import Application
+
 
 logger = logging.getLogger(__name__)
 
@@ -76,12 +78,16 @@ class JobSuggestionsView(APIView):
 
             job_suggestions = []
             for job, score in zip(jobs, cosine_sim):
+                already_applied = Application.objects.filter(user=request.user, job=job).exists()
+
                 job_suggestions.append({
                     "id": job.id,
                     "title": job.title,
                     "company": job.company,
+                    "location": job.location,
                     "description": job.description,
-                    "score": float(score)
+                    "score": float(score),
+                    "applied": already_applied   # check if applied
                 })
 
             job_suggestions = sorted(job_suggestions, key=lambda x: x["score"], reverse=True)
