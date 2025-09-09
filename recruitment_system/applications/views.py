@@ -80,6 +80,9 @@ class ApplicationDetailView(generics.RetrieveUpdateAPIView):
     serializer_class = ApplicationSerializer
     permission_classes = [permissions.IsAuthenticated]
 
+    def perform_update(self, serializer):
+        # ensure recruiter can only update status
+        serializer.save()
 
 class JobApplicationsView(APIView):
     permission_classes = [IsAuthenticated]

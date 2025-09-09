@@ -4,18 +4,20 @@ from jobs.models import Job
 from resumes.models import Resume
 
 class Application(models.Model):
+    STATUS_CHOICES = [
+        ("Pending", "Pending"),
+        ("Shortlisted", "Shortlisted"),
+        ("Rejected", "Rejected"),
+        ("Hired", "Hired"),
+    ]
     User = get_user_model()
     job = models.ForeignKey(Job, on_delete=models.CASCADE, related_name='applications')
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     resume = models.ForeignKey(Resume, on_delete=models.SET_NULL, null=True, blank=True)
-    status = models.CharField(
-        max_length=20,
-        choices=[("Pending", "Pending"), ("Accepted", "Accepted"), ("Rejected", "Rejected")],
-        default="Pending"
-    )
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="Pending")  # ✅ add this
     match_score = models.IntegerField(default=0)  # ✅ NEW FIELD
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"{self.user.username} -> {self.job.title}"
+        return f"{self.user.username} -> {self.job.title} ({self.status})"
 

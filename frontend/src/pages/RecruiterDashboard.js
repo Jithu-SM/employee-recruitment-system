@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./styles/RecruiterDashboard.css";
 import { fetchRecruiterJobs, postJob, fetchApplicants } from "../services/api";
+import axios from "axios";
 
 const RecruiterDashboard = () => {
   const [jobs, setJobs] = useState([]);
@@ -36,18 +37,41 @@ const RecruiterDashboard = () => {
     try {
       const res = await fetchApplicants(jobId);
 
-      // Ensure applicants is always an array
+      let apps = [];
       if (Array.isArray(res.data)) {
-        setApplicants(res.data);
+        apps = res.data;
       } else if (res.data && typeof res.data === "object") {
-        setApplicants([res.data]);
-      } else {
-        setApplicants([]);
+        apps = [res.data];
       }
 
+      // sort by match_score (descending)
+      apps.sort((a, b) => (b.match_score || 0) - (a.match_score || 0));
+      setApplicants(apps);
       setShowApplicants(jobId);
     } catch {
       alert("Could not fetch applicants.");
+    }
+  };
+
+  // Update applicant status
+  const handleUpdateStatus = async (appId, newStatus) => {
+    try {
+      const token = localStorage.getItem("token");
+      await axios.patch(
+        `http://127.0.0.1:8000/api/applications/${appId}/`,
+        { status: newStatus },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      setApplicants(prev =>
+        prev.map(app =>
+          app.id === appId ? { ...app, status: newStatus } : app
+        )
+      );
+      alert("✅ Status updated!");
+    } catch (err) {
+      console.error(err);
+      alert("❌ Failed to update status.");
     }
   };
 
@@ -103,7 +127,7 @@ const RecruiterDashboard = () => {
           <div key={job.id} className="job-card">
             <h4>{job.title}</h4>
             <p><b>Company:</b> {job.company || "N/A"}</p>
-            <p><b>Location:</b> {job.location || "Remote"}</p>
+            <p><b>Location:</b> {job.location || "N/A"}</p>
             <p>{job.description.slice(0, 120)}...</p>
             <p><b>Skills:</b> {job.skills_required}</p>
             <button onClick={() => handleViewApplicants(job.id)}>View Applicants</button>
@@ -118,9 +142,32 @@ const RecruiterDashboard = () => {
           {Array.isArray(applicants) && applicants.length > 0 ? (
             <ul>
               {applicants.map((app) => (
-                <li key={app.id}>
-                  <b>{app.user?.username || "Unknown"}</b> - Match: {app.match_score || "N/A"}%
+                <li key={app.id} className="applicant-card">
+                  <b>{app.user?.username || "Unknown"}</b>  
+                  - Match: {app.match_score || "N/A"}%  
                   <p>Status: {app.status}</p>
+
+                  {/* View Resume */}
+                  {app.resume && (
+                    <a
+                      href={`http://127.0.0.1:8000${app.resume.file}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="view-resume-btn"
+                    >
+                      📄 View Resume
+                    </a>
+                  )}
+
+                  {/* Update Status */}
+                  <select
+                    value={app.status}
+                    onChange={(e) => handleUpdateStatus(app.id, e.target.value)}
+                  >
+                    <option value="Pending">Pending</option>
+                    <option value="Shortlisted">Shortlisted</option>
+                    <option value="Rejected">Rejected</option>
+                  </select>
                 </li>
               ))}
             </ul>
