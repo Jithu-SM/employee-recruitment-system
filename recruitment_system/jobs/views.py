@@ -84,7 +84,7 @@ class JobSuggestionsView(APIView):
                     "id": job.id,
                     "title": job.title,
                     "company": job.company,
-                    "location": job.location,
+                    "location": job.location, 
                     "description": job.description,
                     "score": float(score),
                     "applied": already_applied   # check if applied

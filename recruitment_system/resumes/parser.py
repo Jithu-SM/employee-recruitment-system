@@ -2,10 +2,18 @@ import spacy
 import pdfplumber
 
 nlp = spacy.load("en_core_web_sm")
-
-# Example skill / education / exp keywords
-SKILLS = {"python", "django", "react", "javascript", "html", "css", "sql", "java", "kotlin"}
-EDU_KEYWORDS = {"b.tech", "m.tech", "bachelor", "master", "bsc", "msc", "degree", "university", "college"}
+# skill / education / exp keywords
+SKILLS = {
+    "python", "django", "react", "javascript", "html", "css", "sql", "java", "kotlin",
+    "c", "c++", "c#", "go", "typescript", "nodejs", "node.js", "angular", "vue", "flask",
+    "spring", "ruby", "rails", "php", "swift", "objective-c", "matlab", "r", "scala",
+    "perl", "bash", "shell", "powershell", "aws", "azure", "gcp", "docker", "kubernetes",
+    "git", "linux", "unix", "mongodb", "postgresql", "mysql", "firebase", "rest", "graphql",
+    "machine learning", "deep learning", "nlp", "tensorflow", "pytorch", "keras", "opencv",
+    "pandas", "numpy", "scikit-learn", "data analysis", "data science", "excel", "tableau",
+    "power bi", "jira", "agile", "scrum", "ci/cd", "devops"
+}
+EDU_KEYWORDS = {"bca", "mca", "b.tech", "m.tech", "bachelor", "master", "bsc", "msc", "degree", "university", "college"}
 EXP_KEYWORDS = {"experience", "worked", "developed", "intern", "project"}
 
 

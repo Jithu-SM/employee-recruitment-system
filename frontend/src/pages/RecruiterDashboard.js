@@ -147,18 +147,6 @@ const RecruiterDashboard = () => {
                   - Match: {app.match_score || "N/A"}%  
                   <p>Status: {app.status}</p>
 
-                  {/* View Resume */}
-                  {app.resume && (
-                    <a
-                      href={`http://127.0.0.1:8000${app.resume.file}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="view-resume-btn"
-                    >
-                      📄 View Resume
-                    </a>
-                  )}
-
                   {/* Update Status */}
                   <select
                     value={app.status}
@@ -168,6 +156,20 @@ const RecruiterDashboard = () => {
                     <option value="Shortlisted">Shortlisted</option>
                     <option value="Rejected">Rejected</option>
                   </select>
+
+                   {/* View Resume button */}
+                    {app.resume?.url ? (
+                      <a
+                        href={`http://127.0.0.1:8000${app.resume.url}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="resume-btn"
+                      >
+                        📄 View Resume
+                      </a>
+                    ) : (
+                    <p>No resume uploaded</p>
+                  )}
                 </li>
               ))}
             </ul>
