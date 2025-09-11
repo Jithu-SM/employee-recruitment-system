@@ -46,3 +46,5 @@ export const applyJob = (jobId) => API.post(`applications/${jobId}/apply/`);
 // 🔹 FIX: applicants by job route
 export const fetchApplicants = (jobId) =>
   API.get(`applications/job/${jobId}/`);
+export const fetchApplicationStatus = (jobId) =>
+  API.get(`applications/my-status/${jobId}/`).then((res) => res.data);

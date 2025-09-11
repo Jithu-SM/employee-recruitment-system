@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { fetchResume, fetchJobSuggestions, uploadResume, applyJob } from "../services/api";
+import { fetchResume, fetchJobSuggestions, uploadResume, applyJob, fetchApplicationStatus } from "../services/api";
 import { useNavigate } from "react-router-dom";
 import "./styles/CandidateDashboard.css";
 
@@ -10,6 +10,8 @@ const CandidateDashboard = () => {
   const [username, setUsername] = useState("");
   const [uploading, setUploading] = useState(false);
   const [searchQuery, setSearchQuery] = useState(""); // search bar state
+  const [statusJobId, setStatusJobId] = useState(null);
+  const [currentStatus, setCurrentStatus] = useState(null);
   const navigate = useNavigate();
 
   // Decode JWT to get username
@@ -69,6 +71,22 @@ const CandidateDashboard = () => {
       ));
     }
     alert(err.response?.data?.message || "Application failed.");
+  }
+};
+
+  // Show application status
+  const handleShowStatus = async (jobId) => {
+  if (statusJobId === jobId) {
+    setStatusJobId(null);
+    setCurrentStatus(null);
+    return;
+  }
+  setStatusJobId(jobId);
+  try {
+    const data = await fetchApplicationStatus(jobId);
+    setCurrentStatus(data.status || data.detail || "Unknown");
+  } catch (err) {
+    setCurrentStatus("Unable to fetch status.");
   }
 };
 
@@ -135,26 +153,61 @@ const CandidateDashboard = () => {
                   <p><b>Location:</b> {job.location || "Remote"}</p>
                   <p>{job.description.slice(0, 150)}...</p>
                 </div>
-
-                {appliedJobs.includes(job.id) ? (
-                  <button className="applied-btn" disabled>
-                    ✅ Applied
-                  </button>
+                {job.applied ? (
+                  <>
+                    <button className="apply-btn applied" disabled>
+                      Applied
+                    </button>
+                  </>
                 ) : (
                   <button
-                    className={`apply-btn ${job.applied ? "applied" : ""}`}
+                    className={`apply-btn`}
                     onClick={() => handleApply(job.id)}
-                    disabled={job.applied}
                   >
-                  {job.applied ? "Applied" : "Apply"}
-                </button>
-
+                    Apply
+                  </button>
                 )}
               </li>
             ))}
           </ul>
         ) : (
           <p>No job suggestions match your search.</p>
+        )}
+      </div>
+
+      {/* Application Status Section */}
+      <div className="status-section">
+        <h3>Application Status</h3>
+        {jobs.length === 0 ? (
+          <p>No applications found. Apply to jobs to see status here.</p>
+        ) : (
+          <ul className="status-list">
+            {jobs.map((job) => (
+              <li key={job.id} className="status-item">
+                <div className="status-info">
+                  <p><b>Job Title:</b> {job.title}</p>
+                  <p><b>Company:</b> {job.company}</p>
+                </div>
+
+                {/* Show status button */}
+                {job.applied && (
+                  <button
+                    className="show-status-btn"
+                    onClick={() => handleShowStatus(job.id)}
+                  >
+                    {statusJobId === job.id ? "Hide Status" : "Show Status"}
+                  </button>
+                )}
+
+                {/* Current status badge */}
+                {statusJobId === job.id && (
+                  <div className="current-status">
+                    <p>{currentStatus}</p>
+                  </div>
+                )}
+              </li>
+            ))}
+          </ul>
         )}
       </div>
 

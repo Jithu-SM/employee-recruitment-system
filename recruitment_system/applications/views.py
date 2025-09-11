@@ -91,3 +91,14 @@ class JobApplicationsView(APIView):
         applications = Application.objects.filter(job_id=job_id)
         serializer = ApplicationSerializer(applications, many=True)
         return Response(serializer.data)
+
+class MyApplicationStatusView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, job_id):
+        try:
+            application = Application.objects.get(user=request.user, job_id=job_id)
+            serializer = ApplicationSerializer(application)
+            return Response(serializer.data)
+        except Application.DoesNotExist:
+            return Response({"detail": "No application found."}, status=404)
