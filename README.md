@@ -17,7 +17,7 @@ The system is built with **Django REST Framework** for the backend and **React.j
 ### Candidate
 
 * Register/login with **JWT Authentication**
-* Upload resume (PDF/DOC/DOCX)
+* Upload resume (PDF)
 * Parsed resume data displayed on dashboard
 * Job suggestions using **TF-IDF + Cosine Similarity**
 * Apply to jobs directly from dashboard
