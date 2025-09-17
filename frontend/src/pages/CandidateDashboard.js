@@ -13,6 +13,8 @@ const CandidateDashboard = () => {
   const [statusJobId, setStatusJobId] = useState(null);
   const [currentStatus, setCurrentStatus] = useState(null);
   const navigate = useNavigate();
+  const [applications, setApplications] = useState([]);
+  
 
   // Decode JWT to get username
   useEffect(() => {
@@ -31,6 +33,17 @@ const CandidateDashboard = () => {
     fetchJobSuggestions()
       .then((res) => setJobs(res.data))
       .catch((err) => console.error(err));
+
+      // Fetch applications for notifications
+    const token = localStorage.getItem("token");
+    if (token) {
+      fetch("http://127.0.0.1:8000/api/applications/my/", {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+        .then((res) => res.json())
+        .then((data) => setApplications(data))
+        .catch((err) => console.error("Error fetching applications", err));
+    }
   }, []);
 
   // Resume upload handler
@@ -208,6 +221,27 @@ const CandidateDashboard = () => {
               </li>
             ))}
           </ul>
+        )}
+      </div>
+
+      
+      {/* Notifications Section */}
+      <div className="notifications-section">
+        <h3>Notifications</h3>
+        {applications.filter(a => a.recruiter_message).length > 0 ? (
+          <ul>
+            {applications
+              .filter(a => a.recruiter_message)
+              .map((app) => (
+                <li key={app.id} className="notification-card">
+                  <b>{app.job}</b> - Status: {app.status}
+                  <p>📩 {app.recruiter_message}</p>
+                  <small>Updated on {new Date(app.created_at).toLocaleDateString()}</small>
+                </li>
+              ))}
+          </ul>
+        ) : (
+          <p>No notifications yet.</p>
         )}
       </div>
 

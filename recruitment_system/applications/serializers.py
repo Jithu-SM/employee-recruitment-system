@@ -16,7 +16,7 @@ class ApplicationSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Application
-        fields = ["id", "user", "job", "status", "match_score", "resume", "created_at"]
+        fields = ["id", "user", "job", "status", "recruiter_message", "match_score", "resume", "created_at"]
         read_only_fields = ["user", "job", "match_score", "resume", "created_at"]  # only status is writable
     
     def get_user(self, obj):

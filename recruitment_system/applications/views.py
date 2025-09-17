@@ -102,3 +102,23 @@ class MyApplicationStatusView(APIView):
             return Response(serializer.data)
         except Application.DoesNotExist:
             return Response({"detail": "No application found."}, status=404)
+        
+class ApplicationUpdateView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def patch(self, request, pk):
+        try:
+            application = Application.objects.get(pk=pk)
+        except Application.DoesNotExist:
+            return Response({"error": "Application not found"}, status=404)
+
+        status_value = request.data.get("status")
+        message = request.data.get("recruiter_message")
+
+        if status_value:
+            application.status = status_value
+        if message:
+            application.recruiter_message = message
+
+        application.save()
+        return Response({"message": "Application updated successfully"})

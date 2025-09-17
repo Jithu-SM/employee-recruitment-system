@@ -14,7 +14,8 @@ class Application(models.Model):
     job = models.ForeignKey(Job, on_delete=models.CASCADE, related_name='applications')
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     resume = models.ForeignKey(Resume, on_delete=models.SET_NULL, null=True, blank=True)
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="Pending")  # ✅ add this
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="Pending")  
+    recruiter_message = models.TextField(blank=True, null=True)
     match_score = models.IntegerField(default=0)  # ✅ NEW FIELD
     created_at = models.DateTimeField(auto_now_add=True)
 

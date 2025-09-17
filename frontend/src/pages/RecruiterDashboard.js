@@ -16,6 +16,8 @@ const RecruiterDashboard = () => {
     skills_required: ""
   });
   const navigate = useNavigate();
+  const [messages, setMessages] = useState({});
+
 
   useEffect(() => {
     fetchRecruiterJobs().then(res => setJobs(res.data)).catch(console.error);
@@ -53,19 +55,21 @@ const RecruiterDashboard = () => {
     }
   };
 
-  // Update applicant status
-  const handleUpdateStatus = async (appId, newStatus) => {
+    // Update applicant status
+  const handleUpdateStatus = async (appId, newStatus, recruiterMessage) => {
     try {
       const token = localStorage.getItem("token");
       await axios.patch(
         `http://127.0.0.1:8000/api/applications/${appId}/`,
-        { status: newStatus },
+        { status: newStatus, recruiter_message: recruiterMessage },
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
       setApplicants(prev =>
         prev.map(app =>
-          app.id === appId ? { ...app, status: newStatus } : app
+          app.id === appId
+            ? { ...app, status: newStatus, recruiter_message: recruiterMessage }
+            : app
         )
       );
       alert("✅ Status updated!");
@@ -75,6 +79,7 @@ const RecruiterDashboard = () => {
     }
   };
 
+  // Logout
   const handleLogout = () => {
     localStorage.removeItem("token");
     navigate("/login");
@@ -147,15 +152,27 @@ const RecruiterDashboard = () => {
                   - Match: {app.match_score || "N/A"}%  
                   <p>Status: {app.status}</p>
 
-                  {/* Update Status */}
+                  {/* Update Status + Message */}
                   <select
                     value={app.status}
-                    onChange={(e) => handleUpdateStatus(app.id, e.target.value)}
+                    onChange={(e) =>
+                      handleUpdateStatus(app.id, e.target.value, messages[app.id] || "")
+                    }
                   >
                     <option value="Pending">Pending</option>
                     <option value="Shortlisted">Shortlisted</option>
                     <option value="Rejected">Rejected</option>
                   </select>
+
+                  <input
+                    type="text"
+                    placeholder="Add a message (optional)"
+                    value={messages[app.id] || ""}
+                    onChange={(e) =>
+                      setMessages({ ...messages, [app.id]: e.target.value })
+                    }
+                  />
+
 
                    {/* View Resume button */}
                     {app.resume?.url ? (
