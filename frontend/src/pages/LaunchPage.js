@@ -1,8 +1,11 @@
 import React from 'react';
 import { Users, Brain, Target, Shield, Zap, CheckCircle } from 'lucide-react';
 import './styles/LaunchPage.css';
+import { useNavigate, Link } from 'react-router-dom';
 
 const LaunchPage = () => {
+  const navigate = useNavigate();
+
   return (
     <div className="launch-page">
       {/* Header */}
@@ -13,8 +16,8 @@ const LaunchPage = () => {
             <span className="brand-name">RecruitAI</span>
           </div>
           <div className="nav-actions">
-            <button className="btn btn-outline">Login</button>
-            <button className="btn btn-primary">Register</button>
+            <button className="btn btn-outline" onClick={() => navigate('/login')}>Login</button>
+            <button className="btn btn-primary" onClick={() => navigate('/register')}>Register</button>
           </div>
         </nav>
       </header>
@@ -33,8 +36,8 @@ const LaunchPage = () => {
               Find the perfect talent faster than ever before.
             </p>
             <div className="hero-actions">
-              <button className="btn btn-primary btn-large">Get Started</button>
-              <button className="btn btn-outline btn-large">Watch Demo</button>
+              <button className="btn btn-primary btn-large" onClick={() => navigate('/register')}>Get Started</button>
+              <button className="btn btn-outline btn-large" onClick={() => navigate('/demo')}>Watch Demo</button>
             </div>
           </div>
           <div className="hero-visual">
@@ -55,7 +58,7 @@ const LaunchPage = () => {
       </section>
 
       {/* Features Section */}
-      <section className="features">
+      <section className="features" id="features">
         <div className="container">
           <div className="section-header">
             <h2>Powerful Features for Modern Recruitment</h2>
@@ -115,7 +118,7 @@ const LaunchPage = () => {
       </section>
 
       {/* How It Works Section */}
-      <section className="how-it-works">
+      <section className="how-it-works" id="how-it-works">
         <div className="container">
           <div className="section-header">
             <h2>How It Works</h2>
@@ -151,7 +154,7 @@ const LaunchPage = () => {
       </section>
 
       {/* Stats Section */}
-      <section className="stats">
+      <section className="stats" id="stats">
         <div className="container">
           <div className="stats-grid">
             <div className="stat-item">
@@ -181,8 +184,8 @@ const LaunchPage = () => {
             <h2>Ready to Transform Your Recruitment?</h2>
             <p>Join hundreds of companies already using RecruitAI to find their perfect candidates</p>
             <div className="cta-actions">
-              <button className="btn btn-primary btn-large">Start Free Trial</button>
-              <button className="btn btn-outline btn-large">Contact Sales</button>
+              <button className="btn btn-primary btn-large" onClick={() => navigate('/register')}>Start Free Trial</button>
+              <button className="btn btn-outline btn-large" onClick={() => navigate('/contact')}>Contact Sales</button>
             </div>
           </div>
         </div>
@@ -201,23 +204,23 @@ const LaunchPage = () => {
             <div className="footer-links">
               <div className="link-group">
                 <h4>Product</h4>
-                <a href="#features">Features</a>
-                <a href="#pricing">Pricing</a>
-                <a href="#demo">Demo</a>
+                <Link to="/features">Features</Link>
+                <Link to="/pricing">Pricing</Link>
+                <Link to="/demo">Demo</Link>
               </div>
               
               <div className="link-group">
                 <h4>Company</h4>
-                <a href="#about">About Us</a>
-                <a href="#careers">Careers</a>
-                <a href="#contact">Contact</a>
+                <Link to="/about">About Us</Link>
+                <Link to="/careers">Careers</Link>
+                <Link to="/contact">Contact</Link>
               </div>
               
               <div className="link-group">
                 <h4>Support</h4>
-                <a href="#help">Help Center</a>
-                <a href="#docs">Documentation</a>
-                <a href="#api">API</a>
+                <Link to="/help">Help Center</Link>
+                <Link to="/docs">Documentation</Link>
+                <Link to="/api">API</Link>
               </div>
             </div>
           </div>
@@ -225,8 +228,8 @@ const LaunchPage = () => {
           <div className="footer-bottom">
             <p>&copy; 2024 RecruitAI. All rights reserved.</p>
             <div className="footer-legal">
-              <a href="#privacy">Privacy Policy</a>
-              <a href="#terms">Terms of Service</a>
+              <Link to="/privacy">Privacy Policy</Link>
+              <Link to="/terms">Terms of Service</Link>
             </div>
           </div>
         </div>
