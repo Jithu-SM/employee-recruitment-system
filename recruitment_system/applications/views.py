@@ -23,8 +23,9 @@ class ApplicationCreateView(APIView):
 class ApplicationListView(APIView):
     permission_classes = [IsAuthenticated]
 
-    def get(self, request, job_id):
-        applications = Application.objects.filter(job_id=job_id)
+    def get(self, request):
+        # Get all applications of the logged-in user
+        applications = Application.objects.filter(user=request.user).select_related("job")
         serializer = ApplicationSerializer(applications, many=True)
         return Response(serializer.data)
 

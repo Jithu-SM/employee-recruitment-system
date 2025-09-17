@@ -152,39 +152,64 @@ const RecruiterDashboard = () => {
                   - Match: {app.match_score || "N/A"}%  
                   <p>Status: {app.status}</p>
 
-                  {/* Update Status + Message */}
-                  <select
-                    value={app.status}
-                    onChange={(e) =>
-                      handleUpdateStatus(app.id, e.target.value, messages[app.id] || "")
-                    }
-                  >
-                    <option value="Pending">Pending</option>
-                    <option value="Shortlisted">Shortlisted</option>
-                    <option value="Rejected">Rejected</option>
-                  </select>
+                  {/* Status + Message Form */}
+                  <div className="status-message-form">
+                    <select
+                      value={messages[app.id]?.status || app.status || "Pending"}
+                      onChange={(e) =>
+                        setMessages({
+                          ...messages,
+                          [app.id]: {
+                            ...messages[app.id],
+                            status: e.target.value,
+                          },
+                        })
+                      }
+                    >
+                      <option value="Pending">Pending</option>
+                      <option value="Shortlisted">Shortlisted</option>
+                      <option value="Rejected">Rejected</option>
+                    </select>
 
-                  <input
-                    type="text"
-                    placeholder="Add a message (optional)"
-                    value={messages[app.id] || ""}
-                    onChange={(e) =>
-                      setMessages({ ...messages, [app.id]: e.target.value })
-                    }
-                  />
+                    <input
+                      type="text"
+                      placeholder="Add a message (optional)"
+                      value={messages[app.id]?.message || ""}
+                      onChange={(e) =>
+                        setMessages({
+                          ...messages,
+                          [app.id]: {
+                            ...messages[app.id],
+                            message: e.target.value,
+                          },
+                        })
+                      }
+                    />
 
+                    <button
+                      onClick={() =>
+                        handleUpdateStatus(
+                          app.id,
+                          messages[app.id]?.status || app.status,
+                          messages[app.id]?.message || ""
+                        )
+                      }
+                    >
+                      ✅ Update
+                    </button>
+                  </div>
 
-                   {/* View Resume button */}
-                    {app.resume?.url ? (
-                      <a
-                        href={`http://127.0.0.1:8000${app.resume.url}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="resume-btn"
-                      >
-                        📄 View Resume
-                      </a>
-                    ) : (
+                  {/* View Resume button */}
+                  {app.resume?.url ? (
+                    <a
+                      href={`http://127.0.0.1:8000${app.resume.url}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="resume-btn"
+                    >
+                      📄 View Resume
+                    </a>
+                  ) : (
                     <p>No resume uploaded</p>
                   )}
                 </li>

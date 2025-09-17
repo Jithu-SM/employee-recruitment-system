@@ -37,7 +37,7 @@ const CandidateDashboard = () => {
       // Fetch applications for notifications
     const token = localStorage.getItem("token");
     if (token) {
-      fetch("http://127.0.0.1:8000/api/applications/my/", {
+      fetch("http://127.0.0.1:8000/api/applications/my-applications/", {
         headers: { Authorization: `Bearer ${token}` },
       })
         .then((res) => res.json())
