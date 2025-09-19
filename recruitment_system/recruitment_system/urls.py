@@ -35,6 +35,7 @@ urlpatterns = [
     path('api/auth/', include('rest_framework.urls')),  # DRF's built-in login
     path('api/', include('users.urls')),
     path('api/token/', CustomTokenObtainPairView.as_view(), name='token_obtain_pair'),
+    path("api/admin/", include("admin_api.urls")),
 ]
 
 # ✅ This serves media files in development
