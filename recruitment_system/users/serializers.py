@@ -23,9 +23,7 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
     @classmethod
     def get_token(cls, user):
         token = super().get_token(user)
-
-        # Add extra claims from CustomUser model
-        token['username'] = user.username
-        token['user_type'] = user.user_type   # 👈 this comes from your RegisterSerializer
-
+        # Add custom claims to the token
+        token["user_type"] = user.user_type
+        token["username"] = user.username
         return token

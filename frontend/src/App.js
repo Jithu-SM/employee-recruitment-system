@@ -3,6 +3,7 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import CandidateDashboard from "./pages/CandidateDashboard";
 import RecruiterDashboard from "./pages/RecruiterDashboard";
+import AdminDashboard from "./pages/AdminDashboard";
 import LaunchPage from "./pages/LaunchPage";
 
 function App() {
@@ -15,6 +16,7 @@ function App() {
         {/* <Route path="/dashboard" element={<Dashboard />} /> */}
         <Route path="/candidate-dashboard" element={<CandidateDashboard />} />
         <Route path="/recruiter-dashboard" element={<RecruiterDashboard />} />
+        <Route path="/admin-dashboard" element={<AdminDashboard />} />
       </Routes>
     </Router>
   );
