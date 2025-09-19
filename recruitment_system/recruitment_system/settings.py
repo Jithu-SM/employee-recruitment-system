@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt',
     'corsheaders',
     'applications',                 # application tracking app
+    "admin_api",                    # admin API app
 ]
 
 REST_FRAMEWORK = {

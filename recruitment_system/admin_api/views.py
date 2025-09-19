@@ -1,44 +1,44 @@
+from rest_framework.views import APIView
+from rest_framework.response import Response
 from rest_framework.permissions import IsAdminUser
-from rest_framework.generics import ListAPIView, RetrieveUpdateDestroyAPIView
 from users.models import CustomUser
 from jobs.models import Job
-from resumes.models import Resume
 from applications.models import Application
-from users.serializers import UserSerializer
-from jobs.serializers import JobSerializer
-from resumes.serializers import ResumeSerializer
-from applications.serializers import ApplicationSerializer
+from resumes.models import Resume
+from .serializers import UserSerializer, JobSerializer, ApplicationSerializer, ResumeSerializer
 
 # Users
-class AdminUserListView(ListAPIView):
-    queryset = CustomUser.objects.all()
-    serializer_class = UserSerializer
+class AdminUserListView(APIView):
     permission_classes = [IsAdminUser]
 
-class AdminUserDetailView(RetrieveUpdateDestroyAPIView):
-    queryset = CustomUser.objects.all()
-    serializer_class = UserSerializer
-    permission_classes = [IsAdminUser]
+    def get(self, request):
+        users = CustomUser.objects.all()
+        serializer = UserSerializer(users, many=True)
+        return Response(serializer.data)
 
 # Jobs
-class AdminJobListView(ListAPIView):
-    queryset = Job.objects.all()
-    serializer_class = JobSerializer
+class AdminJobListView(APIView):
     permission_classes = [IsAdminUser]
 
-class AdminJobDetailView(RetrieveUpdateDestroyAPIView):
-    queryset = Job.objects.all()
-    serializer_class = JobSerializer
-    permission_classes = [IsAdminUser]
-
-# Resumes
-class AdminResumeListView(ListAPIView):
-    queryset = Resume.objects.all()
-    serializer_class = ResumeSerializer
-    permission_classes = [IsAdminUser]
+    def get(self, request):
+        jobs = Job.objects.all()
+        serializer = JobSerializer(jobs, many=True)
+        return Response(serializer.data)
 
 # Applications
-class AdminApplicationListView(ListAPIView):
-    queryset = Application.objects.all()
-    serializer_class = ApplicationSerializer
+class AdminApplicationListView(APIView):
     permission_classes = [IsAdminUser]
+
+    def get(self, request):
+        apps = Application.objects.all()
+        serializer = ApplicationSerializer(apps, many=True)
+        return Response(serializer.data)
+
+# Resumes
+class AdminResumeListView(APIView):
+    permission_classes = [IsAdminUser]
+
+    def get(self, request):
+        resumes = Resume.objects.all()
+        serializer = ResumeSerializer(resumes, many=True)
+        return Response(serializer.data)
