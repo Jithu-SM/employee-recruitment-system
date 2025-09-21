@@ -7,20 +7,24 @@ const AdminDashboard = () => {
   const [users, setUsers] = useState([]);
   const [jobs, setJobs] = useState([]);
   const [applications, setApplications] = useState([]);
+  const [resumes, setResumes] = useState([]);
   const [editing, setEditing] = useState(null); // {type, data, isNew}
+  const [viewing, setViewing] = useState(null); // {type, data}
   const navigate = useNavigate();
 
   const token = localStorage.getItem("token");
   const headers = { Authorization: `Bearer ${token}` };
 
   const fetchData = async () => {
-    const [usersRes, jobsRes, appsRes] = await Promise.all([
+    const [usersRes, jobsRes, resumesRes, appsRes] = await Promise.all([
       axios.get("http://127.0.0.1:8000/api/admin/users/", { headers }),
       axios.get("http://127.0.0.1:8000/api/admin/jobs/", { headers }),
+      axios.get("http://127.0.0.1:8000/api/admin/resumes/", { headers }),
       axios.get("http://127.0.0.1:8000/api/admin/applications/", { headers }),
     ]);
     setUsers(usersRes.data);
     setJobs(jobsRes.data);
+    setResumes(resumesRes.data);
     setApplications(appsRes.data);
   };
 
@@ -97,6 +101,7 @@ const AdminDashboard = () => {
             <li key={user.id}>
               <b>{user.username}</b> ({user.email}) - Role: {user.user_type}
               <div className="actions">
+                <button onClick={() => setViewing({ type: "users", data: user })}>View</button>
                 <button onClick={() => setEditing({ type: "users", data: user, isNew: false })}>
                   Edit
                 </button>
@@ -106,6 +111,24 @@ const AdminDashboard = () => {
           ))}
         </ul>
       </section>
+  
+      {/* Resumes Section */}
+      <section>
+        <h3>📄 Resumes</h3>
+        <ul>
+          {resumes.map(resume => (
+            <li key={resume.id}>
+              {resume.user?.username || "Unknown"} - 
+              <a href={resume.file} target="_blank" rel="noreferrer">View Resume</a>
+              <div className="actions">
+                <button onClick={() => alert(JSON.stringify(resume, null, 2))}>View</button>
+                <button onClick={() => handleDelete("resumes", resume.id)}>Delete</button>
+              </div>
+            </li>
+          ))}
+        </ul>
+      </section>
+
 
       {/* Jobs */}
       <section>
@@ -118,6 +141,7 @@ const AdminDashboard = () => {
             <li key={job.id}>
               <b>{job.title}</b> - {job.company} ({job.location})
               <div className="actions">
+                <button onClick={() => setViewing({ type: "jobs", data: job })}>View</button>
                 <button onClick={() => setEditing({ type: "jobs", data: job, isNew: false })}>
                   Edit
                 </button>
@@ -134,9 +158,10 @@ const AdminDashboard = () => {
         <ul>
           {applications.map((app) => (
             <li key={app.id}>
-              <b>{app.user?.username}</b> → {app.job?.title || app.job} @ {app.job?.company || ""}
+              <b>{app.user?.username}</b> → {app.job?.title} @ {app.job?.company}
               <p>Status: {app.status} | Match: {app.match_score}%</p>
               <div className="actions">
+                <button onClick={() => setViewing({ type: "applications", data: app })}>View</button>
                 <button onClick={() => setEditing({ type: "applications", data: app, isNew: false })}>
                   Edit
                 </button>
@@ -147,7 +172,7 @@ const AdminDashboard = () => {
         </ul>
       </section>
 
-      {/* Modal */}
+      {/* Edit Modal */}
       {editing && (
         <div className="modal">
           <div className="modal-content">
@@ -169,11 +194,20 @@ const AdminDashboard = () => {
               ))}
               <div className="modal-actions">
                 <button type="submit">Save</button>
-                <button type="button" onClick={() => setEditing(null)}>
-                  Cancel
-                </button>
+                <button type="button" onClick={() => setEditing(null)}>Cancel</button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* View Modal */}
+      {viewing && (
+        <div className="modal">
+          <div className="modal-content">
+            <h3>Details</h3>
+            <pre>{JSON.stringify(viewing.data, null, 2)}</pre>
+            <button onClick={() => setViewing(null)}>Close</button>
           </div>
         </div>
       )}
