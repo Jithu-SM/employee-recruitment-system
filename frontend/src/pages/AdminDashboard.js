@@ -28,14 +28,12 @@ const AdminDashboard = () => {
     fetchData();
   }, []);
 
-  // Delete handler
   const handleDelete = async (type, id) => {
     if (!window.confirm("Are you sure?")) return;
     await axios.delete(`http://127.0.0.1:8000/api/admin/${type}/${id}/`, { headers });
     fetchData();
   };
 
-  // Save (Create or Update)
   const handleSave = async (type, data, isNew) => {
     try {
       if (isNew) {
@@ -50,7 +48,6 @@ const AdminDashboard = () => {
     }
   };
 
-  // Logout
   const handleLogout = () => {
     localStorage.removeItem("token");
     navigate("/login");
@@ -61,6 +58,28 @@ const AdminDashboard = () => {
     users: ["username", "email", "user_type"],
     jobs: ["title", "company", "location", "description", "skills_required"],
     applications: ["status"],
+  };
+
+  // Dropdown options
+  const dropdownOptions = {
+    user_type: ["admin", "recruiter", "candidate"],
+    status: ["Pending", "Shortlisted", "Rejected", "Hired"],
+  };
+
+  const renderField = (field, value) => {
+    if (dropdownOptions[field]) {
+      return (
+        <select name={field} defaultValue={value || ""} required>
+          <option value="">Select {field}</option>
+          {dropdownOptions[field].map((opt) => (
+            <option key={opt} value={opt}>
+              {opt}
+            </option>
+          ))}
+        </select>
+      );
+    }
+    return <input name={field} defaultValue={value || ""} required={field !== "status"} />;
   };
 
   return (
@@ -128,7 +147,7 @@ const AdminDashboard = () => {
         </ul>
       </section>
 
-      {/* Modal Form */}
+      {/* Modal */}
       {editing && (
         <div className="modal">
           <div className="modal-content">
@@ -145,16 +164,14 @@ const AdminDashboard = () => {
               {formFields[editing.type].map((field) => (
                 <div key={field}>
                   <label>{field}:</label>
-                  <input
-                    name={field}
-                    defaultValue={editing.data[field] || ""}
-                    required={field !== "status"}
-                  />
+                  {renderField(field, editing.data[field])}
                 </div>
               ))}
               <div className="modal-actions">
                 <button type="submit">Save</button>
-                <button type="button" onClick={() => setEditing(null)}>Cancel</button>
+                <button type="button" onClick={() => setEditing(null)}>
+                  Cancel
+                </button>
               </div>
             </form>
           </div>
