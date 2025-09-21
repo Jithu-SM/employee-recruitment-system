@@ -8,27 +8,43 @@ const AdminDashboard = () => {
   const [jobs, setJobs] = useState([]);
   const [resumes, setResumes] = useState([]);
   const [applications, setApplications] = useState([]);
+  const [editing, setEditing] = useState(null); // {type, data}
   const navigate = useNavigate();
 
   const token = localStorage.getItem("token");
   const headers = { Authorization: `Bearer ${token}` };
 
-  useEffect(() => {
-    axios.get("http://127.0.0.1:8000/api/admin/users/", { headers }).then(res => setUsers(res.data));
-    axios.get("http://127.0.0.1:8000/api/admin/jobs/", { headers }).then(res => setJobs(res.data));
-    axios.get("http://127.0.0.1:8000/api/admin/resumes/", { headers }).then(res => setResumes(res.data));
-    axios.get("http://127.0.0.1:8000/api/admin/applications/", { headers }).then(res => setApplications(res.data));
-  }, []);
+  // Fetch all data
+  const fetchData = async () => {
+    const [usersRes, jobsRes, resumesRes, appsRes] = await Promise.all([
+      axios.get("http://127.0.0.1:8000/api/admin/users/", { headers }),
+      axios.get("http://127.0.0.1:8000/api/admin/jobs/", { headers }),
+      axios.get("http://127.0.0.1:8000/api/admin/resumes/", { headers }),
+      axios.get("http://127.0.0.1:8000/api/admin/applications/", { headers }),
+    ]);
+    setUsers(usersRes.data);
+    setJobs(jobsRes.data);
+    setResumes(resumesRes.data);
+    setApplications(appsRes.data);
+  };
 
-  // Example handlers (implement API calls)
+  useEffect(() => { fetchData(); }, []);
+
+  // Delete
   const handleDelete = async (type, id) => {
     if (!window.confirm("Are you sure?")) return;
+    await axios.delete(`http://127.0.0.1:8000/api/admin/${type}/${id}/`, { headers });
+    fetchData();
+  };
+
+  // Save Edit
+  const handleSave = async (type, data) => {
     try {
-      await axios.delete(`http://127.0.0.1:8000/api/admin/${type}/${id}/`, { headers });
-      alert(`${type} deleted successfully`);
-      window.location.reload();
+      await axios.put(`http://127.0.0.1:8000/api/admin/${type}/${data.id}/`, data, { headers });
+      setEditing(null);
+      fetchData();
     } catch (err) {
-      alert("Failed to delete " + type);
+      alert("Failed to update " + type);
     }
   };
 
@@ -44,14 +60,12 @@ const AdminDashboard = () => {
       {/* Users Section */}
       <section>
         <h3>👥 Users</h3>
-        <button className="create-btn">+ Create User</button>
         <ul>
           {users.map(user => (
             <li key={user.id}>
               <b>{user.username}</b> ({user.email}) - Role: {user.user_type}
               <div className="actions">
-                <button onClick={() => alert(JSON.stringify(user, null, 2))}>View</button>
-                <button>Edit</button>
+                <button onClick={() => setEditing({ type: "users", data: user })}>Edit</button>
                 <button onClick={() => handleDelete("users", user.id)}>Delete</button>
               </div>
             </li>
@@ -62,32 +76,13 @@ const AdminDashboard = () => {
       {/* Jobs Section */}
       <section>
         <h3>💼 Jobs</h3>
-        <button className="create-btn">+ Create Job</button>
         <ul>
           {jobs.map(job => (
             <li key={job.id}>
               <b>{job.title}</b> - {job.company} ({job.location})
               <div className="actions">
-                <button onClick={() => alert(JSON.stringify(job, null, 2))}>View</button>
-                <button>Edit</button>
+                <button onClick={() => setEditing({ type: "jobs", data: job })}>Edit</button>
                 <button onClick={() => handleDelete("jobs", job.id)}>Delete</button>
-              </div>
-            </li>
-          ))}
-        </ul>
-      </section>
-
-      {/* Resumes Section */}
-      <section>
-        <h3>📄 Resumes</h3>
-        <ul>
-          {resumes.map(resume => (
-            <li key={resume.id}>
-              {resume.user?.username || "Unknown"} - 
-              <a href={resume.file} target="_blank" rel="noreferrer">View Resume</a>
-              <div className="actions">
-                <button onClick={() => alert(JSON.stringify(resume, null, 2))}>View</button>
-                <button onClick={() => handleDelete("resumes", resume.id)}>Delete</button>
               </div>
             </li>
           ))}
@@ -101,16 +96,40 @@ const AdminDashboard = () => {
           {applications.map(app => (
             <li key={app.id}>
               <b>{app.user?.username}</b> → {app.job?.title || app.job} @ {app.job?.company || ""}
-              <p>Status: <span className={`status ${app.status.toLowerCase()}`}>{app.status}</span> | Match: {app.match_score}%</p>
+              <p>Status: {app.status} | Match: {app.match_score}%</p>
               <div className="actions">
-                <button onClick={() => alert(JSON.stringify(app, null, 2))}>View</button>
-                <button>Edit</button>
+                <button onClick={() => setEditing({ type: "applications", data: app })}>Edit</button>
                 <button onClick={() => handleDelete("applications", app.id)}>Delete</button>
               </div>
             </li>
           ))}
         </ul>
       </section>
+
+      {/* Edit Modal */}
+      {editing && (
+        <div className="modal">
+          <div className="modal-content">
+            <h3>Edit {editing.type}</h3>
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                const formData = Object.fromEntries(new FormData(e.target));
+                handleSave(editing.type, { ...editing.data, ...formData });
+              }}
+            >
+              {Object.keys(editing.data).map(key => (
+                <div key={key}>
+                  <label>{key}:</label>
+                  <input name={key} defaultValue={editing.data[key]} />
+                </div>
+              ))}
+              <button type="submit">Save</button>
+              <button type="button" onClick={() => setEditing(null)}>Cancel</button>
+            </form>
+          </div>
+        </div>
+      )}
 
       <button onClick={handleLogout} className="logout-btn">Logout</button>
     </div>

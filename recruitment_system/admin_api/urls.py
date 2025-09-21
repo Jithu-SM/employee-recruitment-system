@@ -1,14 +1,13 @@
-from django.urls import path
-from .views import (
-    AdminUserListView,
-    AdminJobListView,
-    AdminApplicationListView,
-    AdminResumeListView,
-)
+from django.urls import path, include
+from rest_framework.routers import DefaultRouter
+from .views import AdminUserViewSet, AdminJobViewSet, AdminResumeViewSet, AdminApplicationViewSet
+
+router = DefaultRouter()
+router.register("users", AdminUserViewSet, basename="admin-users")
+router.register("jobs", AdminJobViewSet, basename="admin-jobs")
+router.register("resumes", AdminResumeViewSet, basename="admin-resumes")
+router.register("applications", AdminApplicationViewSet, basename="admin-applications")
 
 urlpatterns = [
-    path("users/", AdminUserListView.as_view(), name="admin-users"),
-    path("jobs/", AdminJobListView.as_view(), name="admin-jobs"),
-    path("applications/", AdminApplicationListView.as_view(), name="admin-applications"),
-    path("resumes/", AdminResumeListView.as_view(), name="admin-resumes"),
+    path("", include(router.urls)),
 ]

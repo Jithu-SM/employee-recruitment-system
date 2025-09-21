@@ -1,44 +1,26 @@
-from rest_framework.views import APIView
-from rest_framework.response import Response
-from rest_framework.permissions import IsAdminUser
+from rest_framework import viewsets, permissions
 from users.models import CustomUser
 from jobs.models import Job
-from applications.models import Application
 from resumes.models import Resume
-from .serializers import UserSerializer, JobSerializer, ApplicationSerializer, ResumeSerializer
+from applications.models import Application
+from .serializers import UserSerializer, JobSerializer, ResumeSerializer, ApplicationSerializer
 
-# Users
-class AdminUserListView(APIView):
-    permission_classes = [IsAdminUser]
+class AdminUserViewSet(viewsets.ModelViewSet):
+    queryset = CustomUser.objects.all()
+    serializer_class = UserSerializer
+    permission_classes = [permissions.IsAdminUser]
 
-    def get(self, request):
-        users = CustomUser.objects.all()
-        serializer = UserSerializer(users, many=True)
-        return Response(serializer.data)
+class AdminJobViewSet(viewsets.ModelViewSet):
+    queryset = Job.objects.all()
+    serializer_class = JobSerializer
+    permission_classes = [permissions.IsAdminUser]
 
-# Jobs
-class AdminJobListView(APIView):
-    permission_classes = [IsAdminUser]
+class AdminResumeViewSet(viewsets.ModelViewSet):
+    queryset = Resume.objects.all()
+    serializer_class = ResumeSerializer
+    permission_classes = [permissions.IsAdminUser]
 
-    def get(self, request):
-        jobs = Job.objects.all()
-        serializer = JobSerializer(jobs, many=True)
-        return Response(serializer.data)
-
-# Applications
-class AdminApplicationListView(APIView):
-    permission_classes = [IsAdminUser]
-
-    def get(self, request):
-        apps = Application.objects.all()
-        serializer = ApplicationSerializer(apps, many=True)
-        return Response(serializer.data)
-
-# Resumes
-class AdminResumeListView(APIView):
-    permission_classes = [IsAdminUser]
-
-    def get(self, request):
-        resumes = Resume.objects.all()
-        serializer = ResumeSerializer(resumes, many=True)
-        return Response(serializer.data)
+class AdminApplicationViewSet(viewsets.ModelViewSet):
+    queryset = Application.objects.all()
+    serializer_class = ApplicationSerializer
+    permission_classes = [permissions.IsAdminUser]
