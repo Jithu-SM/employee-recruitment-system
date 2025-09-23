@@ -107,6 +107,40 @@ button {
 .status.shortlisted { color: #28a745; font-weight: bold; }
 .status.rejected { color: #dc3545; font-weight: bold; }
 
+.controls {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 10px;
+}
+
+.controls input, 
+.controls select {
+  padding: 6px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+}
+
+.pagination {
+  margin-top: 10px;
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+}
+
+.pagination button {
+  padding: 5px 10px;
+  background: #007bff;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.pagination button:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+}
+
 
 .modal {
   position: fixed;
