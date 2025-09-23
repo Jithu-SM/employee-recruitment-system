@@ -49,6 +49,20 @@ const AdminDashboard = () => {
     fetchData();
   }, []);
 
+    const handleSave = async (type, data, isNew) => {
+    try {
+      if (isNew) {
+        await axios.post(`http://127.0.0.1:8000/api/admin/${type}/`, data, { headers });
+      } else {
+        await axios.put(`http://127.0.0.1:8000/api/admin/${type}/${data.id}/`, data, { headers });
+      }
+      setEditing(null);
+      fetchData();
+    } catch (err) {
+      alert("Failed to save " + type);
+    }
+  };
+  
   // USERS
   const getFilteredUsers = () => {
     let filtered = users.filter(
@@ -389,12 +403,10 @@ const AdminDashboard = () => {
               onSubmit={(e) => {
                 e.preventDefault();
                 const formData = Object.fromEntries(new FormData(e.target));
-                // handleSave(editing.type, { ...editing.data, ...formData }, editing.isNew);
-                // You can implement handleSave as in your original code
-                alert("Save not implemented in this snippet.");
+                handleSave(editing.type, { ...editing.data, ...formData }, editing.isNew);
               }}
             >
-              {formFields[editing.type]?.map((field) => (
+              {formFields[editing.type].map((field) => (
                 <div key={field}>
                   <label>{field}:</label>
                   {renderField(field, editing.data[field])}
