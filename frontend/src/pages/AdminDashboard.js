@@ -206,7 +206,38 @@ const AdminDashboard = () => {
         <div className="modal">
           <div className="modal-content">
             <h3>Details</h3>
-            <pre>{JSON.stringify(viewing.data, null, 2)}</pre>
+
+            {viewing.type === "users" && (
+              <div>
+                <p><b>Username:</b> {viewing.data.username}</p>
+                <p><b>Email:</b> {viewing.data.email}</p>
+                <p><b>Role:</b> {viewing.data.user_type}</p>
+              </div>
+            )}
+
+            {viewing.type === "jobs" && (
+              <div>
+                <p><b>Title:</b> {viewing.data.title}</p>
+                <p><b>Company:</b> {viewing.data.company}</p>
+                <p><b>Location:</b> {viewing.data.location}</p>
+                <p><b>Description:</b> {viewing.data.description}</p>
+                <p><b>Skills Required:</b> {viewing.data.skills_required}</p>
+              </div>
+            )}
+
+            {viewing.type === "applications" && (
+              <div>
+                <p><b>Candidate:</b> {viewing.data.user?.username}</p>
+                <p><b>Job:</b> {viewing.data.job?.title} @ {viewing.data.job?.company}</p>
+                <p><b>Status:</b> {viewing.data.status}</p>
+                <p><b>Match Score:</b> {viewing.data.match_score}%</p>
+                {viewing.data.recruiter_message && (
+                  <p><b>Message from Recruiter:</b> {viewing.data.recruiter_message}</p>
+                )}
+                <p><b>Applied On:</b> {new Date(viewing.data.created_at).toLocaleString()}</p>
+              </div>
+            )}
+
             <button onClick={() => setViewing(null)}>Close</button>
           </div>
         </div>
