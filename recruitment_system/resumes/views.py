@@ -2,8 +2,10 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.permissions import IsAuthenticated
+from rest_framework import generics
 from .models import Resume
 from .parser import parse_resume
+from .serializers import ResumeSerializer
 
 class ResumeUploadView(APIView):
     parser_classes = [MultiPartParser, FormParser]
@@ -35,3 +37,8 @@ class ResumeUploadView(APIView):
             'file': str(resume.file),
             'parsed_data': resume.parsed_data
         })
+    
+class ResumeListView(generics.ListAPIView):
+    queryset = Resume.objects.all()
+    serializer_class = ResumeSerializer
+    permission_classes = [IsAuthenticated]

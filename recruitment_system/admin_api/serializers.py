@@ -15,11 +15,16 @@ class JobSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
 class ResumeSerializer(serializers.ModelSerializer):
+    user = UserSerializer(read_only=True)
+
     class Meta:
         model = Resume
         fields = "__all__"
 
 class ApplicationSerializer(serializers.ModelSerializer):
+    user = UserSerializer(read_only=True)
+    job = JobSerializer(read_only=True)
+
     class Meta:
         model = Application
         fields = "__all__"

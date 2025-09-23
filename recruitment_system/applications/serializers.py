@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from .models import Application
 from users.models import CustomUser
+from jobs.models import Job
 from resumes.models import Resume
 
 
@@ -9,9 +10,16 @@ class UserSerializer(serializers.ModelSerializer):
         model = CustomUser
         fields = ["id", "username", "email"]
 
+
+class JobSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Job
+        fields = ["id", "title", "company", "location"]
+
+
 class ApplicationSerializer(serializers.ModelSerializer):
-    user = UserSerializer(read_only=True)   # include user details
-    job = serializers.StringRelatedField(read_only=True)
+    user = UserSerializer(read_only=True)
+    job = JobSerializer(read_only=True)  
     resume = serializers.SerializerMethodField()
 
     class Meta:
