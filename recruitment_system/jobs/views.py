@@ -4,7 +4,7 @@ from rest_framework.permissions import IsAuthenticated
 from resumes.models import Resume
 from resumes.serializers import ResumeSerializer
 from .matcher import match_resumes_to_job
-from rest_framework import generics, permissions
+from rest_framework import generics, permissions, status
 from .models import Job
 from .serializers import JobSerializer
 from sklearn.feature_extraction.text import TfidfVectorizer
@@ -118,3 +118,12 @@ class RecruiterJobsView(APIView):
             serializer.save(recruiter=request.user)  # recruiter auto-filled
             return Response(serializer.data, status=201)
         return Response(serializer.errors, status=400)
+
+#admin approval
+class RecruiterDashboardView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        if request.user.user_type == "recruiter" and not request.user.is_approved:
+            return Response({"detail": "Your account is awaiting admin approval."}, status=status.HTTP_403_FORBIDDEN)
+            # else show dashboard 

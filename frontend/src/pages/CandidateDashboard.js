@@ -234,7 +234,7 @@ const CandidateDashboard = () => {
               .filter(a => a.recruiter_message)
               .map((app) => (
                 <li key={app.id} className="notification-card">
-                  <b>{app.job}</b> - Status: {app.status}
+                  <b>{app.job.title} @ {app.job.company}</b> - Status: {app.status}
                   <p>📩 {app.recruiter_message}</p>
                   <small>Updated on {new Date(app.created_at).toLocaleDateString()}</small>
                 </li>

@@ -8,4 +8,6 @@ class CustomUser(AbstractUser):
         ('admin', 'Admin'),
     )
     user_type = models.CharField(max_length=10, choices=USER_TYPE_CHOICES)
+    is_approved = models.BooleanField(default=False) 
+
 

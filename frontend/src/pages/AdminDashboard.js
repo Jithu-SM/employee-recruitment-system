@@ -219,7 +219,26 @@ const AdminDashboard = () => {
           {getFilteredUsers().map((user) => (
             <li key={user.id}>
               <b>{user.username}</b> ({user.email}) - Role: {user.user_type}
+              {user.user_type === "recruiter" && (
+                <span style={{ color: user.is_approved ? "green" : "red" }}>
+                  {user.is_approved ? "✅ Approved" : "❌ Pending"}
+                </span>
+              )}
               <div className="actions">
+                {user.user_type === "recruiter" && !user.is_approved && (
+                  <button
+                    onClick={async () => {
+                      await axios.post(
+                        `http://127.0.0.1:8000/api/admin/users/${user.id}/approve/`,
+                        {},
+                        { headers }
+                      );
+                      fetchData();
+                    }}
+                  >
+                    Approve
+                  </button>
+                )}
                 <button onClick={() => setViewing({ type: "users", data: user })}>View</button>
                 <button onClick={() => setEditing({ type: "users", data: user, isNew: false })}>
                   Edit
@@ -229,21 +248,8 @@ const AdminDashboard = () => {
             </li>
           ))}
         </ul>
-        <div className="pagination">
-          <button disabled={userPage === 1} onClick={() => setUserPage(userPage - 1)}>
-            ⬅ Prev
-          </button>
-          <span>
-            Page {userPage} of {totalUserPages || 1}
-          </span>
-          <button
-            disabled={userPage === totalUserPages || totalUserPages === 0}
-            onClick={() => setUserPage(userPage + 1)}
-          >
-            Next ➡
-          </button>
-        </div>
       </section>
+
 
       {/* JOBS Section */}
       <section>

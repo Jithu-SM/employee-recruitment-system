@@ -23,7 +23,13 @@ const Login = () => {
         // Decode JWT to check role
         const payload = JSON.parse(atob(data.access.split(".")[1]));
         if (payload.user_type === "recruiter") {
-          navigate("/recruiter-dashboard");
+          console.log(payload);
+          if (payload.is_approved) {
+            navigate("/recruiter-dashboard");
+          } else {
+            alert("Your recruiter account is awaiting admin approval.");
+            navigate("/login");
+          }
         } else if (payload.user_type === "candidate") {
           navigate("/candidate-dashboard");
         } else if (payload.user_type === "admin") {
