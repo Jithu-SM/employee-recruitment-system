@@ -1,6 +1,23 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import {
+  Brain,
+  Users,
+  Briefcase,
+  FileText,
+  ClipboardList,
+  Sun,
+  Moon,
+  LogOut,
+  ChevronLeft,
+  ChevronRight,
+  Plus,
+  Eye,
+  Edit,
+  Trash2,
+  CheckCircle,
+} from "lucide-react";
 import "./styles/AdminDashboard.css";
 
 const AdminDashboard = () => {
@@ -10,6 +27,9 @@ const AdminDashboard = () => {
   const [resumes, setResumes] = useState([]);
   const [editing, setEditing] = useState(null);
   const [viewing, setViewing] = useState(null);
+  const [activeSection, setActiveSection] = useState("users");
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [darkMode, setDarkMode] = useState(false);
 
   // Pagination & search state for each section
   const [userPage, setUserPage] = useState(1);
@@ -32,6 +52,20 @@ const AdminDashboard = () => {
   const token = localStorage.getItem("token");
   const headers = { Authorization: `Bearer ${token}` };
 
+  // Toggle dark mode
+  useEffect(() => {
+    const savedTheme = localStorage.getItem("theme") || "light";
+    setDarkMode(savedTheme === "dark");
+    document.documentElement.setAttribute("data-theme", savedTheme);
+  }, []);
+
+  const toggleDarkMode = () => {
+    const newTheme = darkMode ? "light" : "dark";
+    setDarkMode(!darkMode);
+    localStorage.setItem("theme", newTheme);
+    document.documentElement.setAttribute("data-theme", newTheme);
+  };
+
   const fetchData = async () => {
     const [usersRes, jobsRes, resumesRes, appsRes] = await Promise.all([
       axios.get("http://127.0.0.1:8000/api/admin/users/", { headers }),
@@ -49,7 +83,7 @@ const AdminDashboard = () => {
     fetchData();
   }, []);
 
-    const handleSave = async (type, data, isNew) => {
+  const handleSave = async (type, data, isNew) => {
     try {
       if (isNew) {
         await axios.post(`http://127.0.0.1:8000/api/admin/${type}/`, data, { headers });
@@ -62,7 +96,7 @@ const AdminDashboard = () => {
       alert("Failed to save " + type);
     }
   };
-  
+
   // USERS
   const getFilteredUsers = () => {
     let filtered = users.filter(
@@ -77,6 +111,7 @@ const AdminDashboard = () => {
     const end = start + 10;
     return filtered.slice(start, end);
   };
+  
   const totalUserPages = Math.ceil(
     users.filter(
       (u) =>
@@ -99,6 +134,7 @@ const AdminDashboard = () => {
     const end = start + 10;
     return filtered.slice(start, end);
   };
+  
   const totalJobPages = Math.ceil(
     jobs.filter(
       (j) =>
@@ -121,6 +157,7 @@ const AdminDashboard = () => {
     const end = start + 10;
     return filtered.slice(start, end);
   };
+  
   const totalAppPages = Math.ceil(
     applications.filter(
       (a) =>
@@ -142,6 +179,7 @@ const AdminDashboard = () => {
     const end = start + 10;
     return filtered.slice(start, end);
   };
+  
   const totalResumePages = Math.ceil(
     resumes.filter(
       (r) =>
@@ -189,214 +227,422 @@ const AdminDashboard = () => {
     return <input name={field} defaultValue={value || ""} required={field !== "status"} />;
   };
 
+  const navItems = [
+    { id: "users", label: "Users", icon: Users, count: users.length },
+    { id: "jobs", label: "Jobs", icon: Briefcase, count: jobs.length },
+    { id: "applications", label: "Applications", icon: ClipboardList, count: applications.length },
+    { id: "resumes", label: "Resumes", icon: FileText, count: resumes.length },
+  ];
+
+  const renderSection = () => {
+    switch (activeSection) {
+      case "users":
+        return (
+          <div className="admin-section">
+            <div className="section-header">
+              <h3 className="section-title">
+                <Users size={28} />
+                Users Management
+              </h3>
+              <button 
+                className="btn btn-primary" 
+                onClick={() => setEditing({ type: "users", data: {}, isNew: true })}
+              >
+                <Plus size={18} />
+                Add User
+              </button>
+            </div>
+            <div className="controls">
+              <input
+                type="text"
+                placeholder="Search users..."
+                value={userSearch}
+                onChange={(e) => {
+                  setUserPage(1);
+                  setUserSearch(e.target.value);
+                }}
+              />
+              <select value={userSort} onChange={(e) => setUserSort(e.target.value)}>
+                <option value="username">Sort by Username</option>
+                <option value="email">Sort by Email</option>
+                <option value="user_type">Sort by Role</option>
+              </select>
+            </div>
+            <ul className="data-table">
+              {getFilteredUsers().map((user) => (
+                <li key={user.id} className="data-row">
+                  <div className="row-header">
+                    <span className="row-title">{user.username}</span>
+                    {user.user_type === "recruiter" && (
+                      <span className={`status-badge ${user.is_approved ? "approved" : "pending"}`}>
+                        {user.is_approved ? "Approved" : "Pending"}
+                      </span>
+                    )}
+                  </div>
+                  <p className="row-meta">{user.email} • Role: {user.user_type}</p>
+                  <div className="actions">
+                    {user.user_type === "recruiter" && !user.is_approved && (
+                      <button
+                        className="btn btn-success"
+                        onClick={async () => {
+                          await axios.post(
+                            `http://127.0.0.1:8000/api/admin/users/${user.id}/approve/`,
+                            {},
+                            { headers }
+                          );
+                          fetchData();
+                        }}
+                      >
+                        <CheckCircle size={16} />
+                        Approve
+                      </button>
+                    )}
+                    <button className="btn btn-info" onClick={() => setViewing({ type: "users", data: user })}>
+                      <Eye size={16} />
+                      View
+                    </button>
+                    <button className="btn btn-secondary" onClick={() => setEditing({ type: "users", data: user, isNew: false })}>
+                      <Edit size={16} />
+                      Edit
+                    </button>
+                    <button className="btn btn-danger" onClick={() => handleDelete("users", user.id)}>
+                      <Trash2 size={16} />
+                      Delete
+                    </button>
+                  </div>
+                </li>
+              ))}
+            </ul>
+            <div className="pagination">
+              <button disabled={userPage === 1} onClick={() => setUserPage(userPage - 1)}>
+                <ChevronLeft size={18} /> Prev
+              </button>
+              <span>Page {userPage} of {totalUserPages || 1}</span>
+              <button
+                disabled={userPage === totalUserPages || totalUserPages === 0}
+                onClick={() => setUserPage(userPage + 1)}
+              >
+                Next <ChevronRight size={18} />
+              </button>
+            </div>
+          </div>
+        );
+
+      case "jobs":
+        return (
+          <div className="admin-section">
+            <div className="section-header">
+              <h3 className="section-title">
+                <Briefcase size={28} />
+                Jobs Management
+              </h3>
+              <button 
+                className="btn btn-primary" 
+                onClick={() => setEditing({ type: "jobs", data: {}, isNew: true })}
+              >
+                <Plus size={18} />
+                Add Job
+              </button>
+            </div>
+            <div className="controls">
+              <input
+                type="text"
+                placeholder="Search jobs..."
+                value={jobSearch}
+                onChange={(e) => {
+                  setJobPage(1);
+                  setJobSearch(e.target.value);
+                }}
+              />
+              <select value={jobSort} onChange={(e) => setJobSort(e.target.value)}>
+                <option value="title">Sort by Title</option>
+                <option value="company">Sort by Company</option>
+                <option value="location">Sort by Location</option>
+              </select>
+            </div>
+            <ul className="data-table">
+              {getFilteredJobs().map((job) => (
+                <li key={job.id} className="data-row">
+                  <div className="row-header">
+                    <span className="row-title">{job.title}</span>
+                  </div>
+                  <p className="row-meta">{job.company} • {job.location}</p>
+                  <div className="actions">
+                    <button className="btn btn-info" onClick={() => setViewing({ type: "jobs", data: job })}>
+                      <Eye size={16} />
+                      View
+                    </button>
+                    <button className="btn btn-secondary" onClick={() => setEditing({ type: "jobs", data: job, isNew: false })}>
+                      <Edit size={16} />
+                      Edit
+                    </button>
+                    <button className="btn btn-danger" onClick={() => handleDelete("jobs", job.id)}>
+                      <Trash2 size={16} />
+                      Delete
+                    </button>
+                  </div>
+                </li>
+              ))}
+            </ul>
+            <div className="pagination">
+              <button disabled={jobPage === 1} onClick={() => setJobPage(jobPage - 1)}>
+                <ChevronLeft size={18} /> Prev
+              </button>
+              <span>Page {jobPage} of {totalJobPages || 1}</span>
+              <button
+                disabled={jobPage === totalJobPages || totalJobPages === 0}
+                onClick={() => setJobPage(jobPage + 1)}
+              >
+                Next <ChevronRight size={18} />
+              </button>
+            </div>
+          </div>
+        );
+
+      case "applications":
+        return (
+          <div className="admin-section">
+            <div className="section-header">
+              <h3 className="section-title">
+                <ClipboardList size={28} />
+                Applications Management
+              </h3>
+            </div>
+            <div className="controls">
+              <input
+                type="text"
+                placeholder="Search applications..."
+                value={appSearch}
+                onChange={(e) => {
+                  setAppPage(1);
+                  setAppSearch(e.target.value);
+                }}
+              />
+              <select value={appSort} onChange={(e) => setAppSort(e.target.value)}>
+                <option value="status">Sort by Status</option>
+                <option value="match_score">Sort by Match Score</option>
+              </select>
+            </div>
+            <ul className="data-table">
+              {getFilteredApps().map((app) => (
+                <li key={app.id} className="data-row">
+                  <div className="row-header">
+                    <span className="row-title">{app.user?.username} → {app.job?.title}</span>
+                    <span className={`status-badge ${app.status.toLowerCase()}`}>
+                      {app.status}
+                    </span>
+                  </div>
+                  <p className="row-meta">{app.job?.company} • Match Score: {app.match_score}%</p>
+                  <div className="actions">
+                    <button className="btn btn-info" onClick={() => setViewing({ type: "applications", data: app })}>
+                      <Eye size={16} />
+                      View
+                    </button>
+                    <button className="btn btn-secondary" onClick={() => setEditing({ type: "applications", data: app, isNew: false })}>
+                      <Edit size={16} />
+                      Edit
+                    </button>
+                    <button className="btn btn-danger" onClick={() => handleDelete("applications", app.id)}>
+                      <Trash2 size={16} />
+                      Delete
+                    </button>
+                  </div>
+                </li>
+              ))}
+            </ul>
+            <div className="pagination">
+              <button disabled={appPage === 1} onClick={() => setAppPage(appPage - 1)}>
+                <ChevronLeft size={18} /> Prev
+              </button>
+              <span>Page {appPage} of {totalAppPages || 1}</span>
+              <button
+                disabled={appPage === totalAppPages || totalAppPages === 0}
+                onClick={() => setAppPage(appPage + 1)}
+              >
+                Next <ChevronRight size={18} />
+              </button>
+            </div>
+          </div>
+        );
+
+      case "resumes":
+        return (
+          <div className="admin-section">
+            <div className="section-header">
+              <h3 className="section-title">
+                <FileText size={28} />
+                Resumes Management
+              </h3>
+            </div>
+            <div className="controls">
+              <input
+                type="text"
+                placeholder="Search resumes..."
+                value={resumeSearch}
+                onChange={(e) => {
+                  setResumePage(1);
+                  setResumeSearch(e.target.value);
+                }}
+              />
+              <select value={resumeSort} onChange={(e) => setResumeSort(e.target.value)}>
+                <option value="id">Sort by ID</option>
+                <option value="user">Sort by User</option>
+              </select>
+            </div>
+            <ul className="data-table">
+              {getFilteredResumes().map((resume) => (
+                <li key={resume.id} className="data-row">
+                  <div className="row-header">
+                    <span className="row-title">{resume.user?.username || "Unknown"}</span>
+                  </div>
+                  <p className="row-meta">
+                    <a href={resume.file} target="_blank" rel="noreferrer" style={{color: 'var(--primary-color)'}}>
+                      View Resume PDF
+                    </a>
+                  </p>
+                  <div className="actions">
+                    <button className="btn btn-info" onClick={() => alert(JSON.stringify(resume, null, 2))}>
+                      <Eye size={16} />
+                      View Details
+                    </button>
+                    <button className="btn btn-danger" onClick={() => handleDelete("resumes", resume.id)}>
+                      <Trash2 size={16} />
+                      Delete
+                    </button>
+                  </div>
+                </li>
+              ))}
+            </ul>
+            <div className="pagination">
+              <button disabled={resumePage === 1} onClick={() => setResumePage(resumePage - 1)}>
+                <ChevronLeft size={18} /> Prev
+              </button>
+              <span>Page {resumePage} of {totalResumePages || 1}</span>
+              <button
+                disabled={resumePage === totalResumePages || totalResumePages === 0}
+                onClick={() => setResumePage(resumePage + 1)}
+              >
+                Next <ChevronRight size={18} />
+              </button>
+            </div>
+          </div>
+        );
+
+      default:
+        return null;
+    }
+  };
+
   return (
     <div className="admin-dashboard">
-      <h2>Admin Dashboard</h2>
-
-      {/* USERS Section */}
-      <section>
-        <h3>👥 Users</h3>
-        <div className="controls">
-          <input
-            type="text"
-            placeholder="Search users..."
-            value={userSearch}
-            onChange={(e) => {
-              setUserPage(1);
-              setUserSearch(e.target.value);
-            }}
-          />
-          <select value={userSort} onChange={(e) => setUserSort(e.target.value)}>
-            <option value="username">Sort by Username</option>
-            <option value="email">Sort by Email</option>
-            <option value="user_type">Sort by Role</option>
-          </select>
+      {/* Sidebar */}
+      <aside className={`admin-sidebar ${sidebarCollapsed ? "collapsed" : ""}`}>
+        <div className="sidebar-header">
+          <div className="sidebar-logo">
+            <Brain size={24} />
+          </div>
+          <span className="sidebar-brand">RecruitAI</span>
         </div>
-        <button onClick={() => setEditing({ type: "users", data: {}, isNew: true })}>
-          ➕ Add User
+        <button 
+          className="sidebar-toggle" 
+          onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+        >
+          {sidebarCollapsed ? <ChevronRight size={18} /> : <ChevronLeft size={18} />}
         </button>
-        <ul>
-          {getFilteredUsers().map((user) => (
-            <li key={user.id}>
-              <b>{user.username}</b> ({user.email}) - Role: {user.user_type}
-              {user.user_type === "recruiter" && (
-                <span style={{ color: user.is_approved ? "green" : "red" }}>
-                  {user.is_approved ? "✅ Approved" : "❌ Pending"}
-                </span>
-              )}
-              <div className="actions">
-                {user.user_type === "recruiter" && !user.is_approved && (
-                  <button
-                    onClick={async () => {
-                      await axios.post(
-                        `http://127.0.0.1:8000/api/admin/users/${user.id}/approve/`,
-                        {},
-                        { headers }
-                      );
-                      fetchData();
-                    }}
-                  >
-                    Approve
-                  </button>
-                )}
-                <button onClick={() => setViewing({ type: "users", data: user })}>View</button>
-                <button onClick={() => setEditing({ type: "users", data: user, isNew: false })}>
-                  Edit
-                </button>
-                <button onClick={() => handleDelete("users", user.id)}>Delete</button>
-              </div>
-            </li>
+        <nav className="sidebar-nav">
+          {navItems.map((item) => (
+            <div
+              key={item.id}
+              className={`nav-item ${activeSection === item.id ? "active" : ""}`}
+              onClick={() => setActiveSection(item.id)}
+            >
+              <item.icon className="nav-icon" />
+              <span className="nav-text">{item.label}</span>
+              <span className="nav-badge">{item.count}</span>
+            </div>
           ))}
-        </ul>
-      </section>
-
-
-      {/* JOBS Section */}
-      <section>
-        <h3>💼 Jobs</h3>
-        <div className="controls">
-          <input
-            type="text"
-            placeholder="Search jobs..."
-            value={jobSearch}
-            onChange={(e) => {
-              setJobPage(1);
-              setJobSearch(e.target.value);
-            }}
-          />
-          <select value={jobSort} onChange={(e) => setJobSort(e.target.value)}>
-            <option value="title">Sort by Title</option>
-            <option value="company">Sort by Company</option>
-            <option value="location">Sort by Location</option>
-          </select>
-        </div>
-        <button onClick={() => setEditing({ type: "jobs", data: {}, isNew: true })}>
-          ➕ Add Job
-        </button>
-        <ul>
-          {getFilteredJobs().map((job) => (
-            <li key={job.id}>
-              <b>{job.title}</b> - {job.company} ({job.location})
-              <div className="actions">
-                <button onClick={() => setViewing({ type: "jobs", data: job })}>View</button>
-                <button onClick={() => setEditing({ type: "jobs", data: job, isNew: false })}>
-                  Edit
-                </button>
-                <button onClick={() => handleDelete("jobs", job.id)}>Delete</button>
-              </div>
-            </li>
-          ))}
-        </ul>
-        <div className="pagination">
-          <button disabled={jobPage === 1} onClick={() => setJobPage(jobPage - 1)}>
-            ⬅ Prev
-          </button>
-          <span>
-            Page {jobPage} of {totalJobPages || 1}
-          </span>
-          <button
-            disabled={jobPage === totalJobPages || totalJobPages === 0}
-            onClick={() => setJobPage(jobPage + 1)}
+        </nav>
+        <div className="sidebar-logout">
+          <div
+            className={`nav-item logout-nav-item${sidebarCollapsed ? " collapsed" : ""}`}
+            onClick={handleLogout}
+            title="Logout"
+            style={{ color: "var(--danger)" }}
           >
-            Next ➡
-          </button>
+            <LogOut className="nav-icon" />
+            {!sidebarCollapsed && <span className="nav-text">Logout</span>}
+          </div>
         </div>
-      </section>
+      </aside>
 
-      {/* APPLICATIONS Section */}
-      <section>
-        <h3>📌 Applications</h3>
-        <div className="controls">
-          <input
-            type="text"
-            placeholder="Search applications..."
-            value={appSearch}
-            onChange={(e) => {
-              setAppPage(1);
-              setAppSearch(e.target.value);
-            }}
-          />
-          <select value={appSort} onChange={(e) => setAppSort(e.target.value)}>
-            <option value="status">Sort by Status</option>
-            <option value="match_score">Sort by Match Score</option>
-          </select>
-        </div>
-        <ul>
-          {getFilteredApps().map((app) => (
-            <li key={app.id}>
-              <b>{app.user?.username}</b> → {app.job?.title} @ {app.job?.company}
-              <p>Status: {app.status} | Match: {app.match_score}%</p>
-              <div className="actions">
-                <button onClick={() => setViewing({ type: "applications", data: app })}>View</button>
-                <button onClick={() => setEditing({ type: "applications", data: app, isNew: false })}>
-                  Edit
-                </button>
-                <button onClick={() => handleDelete("applications", app.id)}>Delete</button>
+      {/* Main Content */}
+      <main className="admin-main">
+        {/* Top Header */}
+        <header className="admin-header">
+          <div className="header-left">
+            <h1 className="page-title">
+              {navItems.find(item => item.id === activeSection)?.label || "Dashboard"}
+            </h1>
+          </div>
+          <div className="header-right">
+            <button className="theme-toggle" onClick={toggleDarkMode}>
+              {darkMode ? <Sun size={24} /> : <Moon size={24} />}
+            </button>
+            <div className="user-profile">
+              <div className="user-avatar">A</div>
+              <div className="user-info">
+                <div className="user-name">Admin</div>
+                <div className="user-role">Administrator</div>
               </div>
-            </li>
-          ))}
-        </ul>
-        <div className="pagination">
-          <button disabled={appPage === 1} onClick={() => setAppPage(appPage - 1)}>
-            ⬅ Prev
-          </button>
-          <span>
-            Page {appPage} of {totalAppPages || 1}
-          </span>
-          <button
-            disabled={appPage === totalAppPages || totalAppPages === 0}
-            onClick={() => setAppPage(appPage + 1)}
-          >
-            Next ➡
-          </button>
-        </div>
-      </section>
+            </div>
+          </div>
+        </header>
 
-      {/* RESUMES Section */}
-      <section>
-        <h3>📄 Resumes</h3>
-        <div className="controls">
-          <input
-            type="text"
-            placeholder="Search resumes..."
-            value={resumeSearch}
-            onChange={(e) => {
-              setResumePage(1);
-              setResumeSearch(e.target.value);
-            }}
-          />
-          <select value={resumeSort} onChange={(e) => setResumeSort(e.target.value)}>
-            <option value="id">Sort by ID</option>
-            <option value="user">Sort by User</option>
-          </select>
-        </div>
-        <ul>
-          {getFilteredResumes().map(resume => (
-            <li key={resume.id}>
-              {resume.user?.username || "Unknown"} - 
-              <a href={resume.file} target="_blank" rel="noreferrer">View Resume</a>
-              <div className="actions">
-                <button onClick={() => alert(JSON.stringify(resume, null, 2))}>View</button>
-                <button onClick={() => handleDelete("resumes", resume.id)}>Delete</button>
+        {/* Dashboard Stats */}
+        <div className="admin-content">
+          <div className="dashboard-stats">
+            <div className="stat-card">
+              <div className="stat-header">
+                <div className="stat-icon users">
+                  <Users size={24} />
+                </div>
               </div>
-            </li>
-          ))}
-        </ul>
-        <div className="pagination">
-          <button disabled={resumePage === 1} onClick={() => setResumePage(resumePage - 1)}>
-            ⬅ Prev
-          </button>
-          <span>
-            Page {resumePage} of {totalResumePages || 1}
-          </span>
-          <button
-            disabled={resumePage === totalResumePages || totalResumePages === 0}
-            onClick={() => setResumePage(resumePage + 1)}
-          >
-            Next ➡
-          </button>
+              <div className="stat-value">{users.length}</div>
+              <div className="stat-label">Total Users</div>
+            </div>
+            <div className="stat-card">
+              <div className="stat-header">
+                <div className="stat-icon jobs">
+                  <Briefcase size={24} />
+                </div>
+              </div>
+              <div className="stat-value">{jobs.length}</div>
+              <div className="stat-label">Active Jobs</div>
+            </div>
+            <div className="stat-card">
+              <div className="stat-header">
+                <div className="stat-icon applications">
+                  <ClipboardList size={24} />
+                </div>
+              </div>
+              <div className="stat-value">{applications.length}</div>
+              <div className="stat-label">Applications</div>
+            </div>
+            <div className="stat-card">
+              <div className="stat-header">
+                <div className="stat-icon resumes">
+                  <FileText size={24} />
+                </div>
+              </div>
+              <div className="stat-value">{resumes.length}</div>
+              <div className="stat-label">Resumes</div>
+            </div>
+          </div>
+
+          {/* Active Section Content */}
+          {renderSection()}
         </div>
-      </section>
+      </main>
 
       {/* Edit Modal */}
       {editing && (
@@ -419,8 +665,8 @@ const AdminDashboard = () => {
                 </div>
               ))}
               <div className="modal-actions">
-                <button type="submit">Save</button>
-                <button type="button" onClick={() => setEditing(null)}>Cancel</button>
+                <button type="submit" className="btn btn-primary">Save</button>
+                <button type="button" className="btn btn-secondary" onClick={() => setEditing(null)}>Cancel</button>
               </div>
             </form>
           </div>
@@ -460,12 +706,12 @@ const AdminDashboard = () => {
                 <p><b>Applied On:</b> {new Date(viewing.data.created_at).toLocaleString()}</p>
               </div>
             )}
-            <button onClick={() => setViewing(null)}>Close</button>
+            <button className="btn btn-primary" onClick={() => setViewing(null)}>Close</button>
           </div>
         </div>
       )}
 
-      <button onClick={handleLogout} className="logout-btn">Logout</button>
+
     </div>
   );
 };
