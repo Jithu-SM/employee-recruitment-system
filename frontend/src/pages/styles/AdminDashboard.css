@@ -516,6 +516,7 @@ body {
 .btn-secondary {
   background: var(--text-secondary);
   color: white;
+  background-color: #4a5568;
 }
 
 /* Data Table */
@@ -662,6 +663,7 @@ body {
 
 .modal-content {
   background: var(--card-bg);
+  color: #667eea;
   border-radius: 20px;
   padding: 40px;
   max-width: 600px;
