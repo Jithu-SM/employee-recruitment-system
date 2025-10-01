@@ -8,6 +8,7 @@ from rest_framework import generics, permissions
 from resumes.models import Resume
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
+from django.utils import timezone
 
 class ApplicationCreateView(APIView):
     permission_classes = [IsAuthenticated]
@@ -84,6 +85,26 @@ class ApplicationDetailView(generics.RetrieveUpdateAPIView):
     def perform_update(self, serializer):
         # ensure recruiter can only update status
         serializer.save()
+    
+    def patch(self, request, pk):
+        try:
+            application = Application.objects.get(pk=pk)
+        except Application.DoesNotExist:
+            return Response({"error": "Application not found"}, status=404)
+
+        status_value = request.data.get("status")
+        message = request.data.get("recruiter_message")
+
+        if status_value:
+            application.status = status_value
+            application.created_at = timezone.now()
+
+        if message:
+            application.recruiter_message = message
+
+        application.save()
+        return Response({"message": "Application updated successfully"})
+    
 
 class JobApplicationsView(APIView):
     permission_classes = [IsAuthenticated]
@@ -104,22 +125,23 @@ class MyApplicationStatusView(APIView):
         except Application.DoesNotExist:
             return Response({"detail": "No application found."}, status=404)
         
-class ApplicationUpdateView(APIView):
-    permission_classes = [IsAuthenticated]
+# class ApplicationUpdateView(APIView):
+#     permission_classes = [IsAuthenticated]
 
-    def patch(self, request, pk):
-        try:
-            application = Application.objects.get(pk=pk)
-        except Application.DoesNotExist:
-            return Response({"error": "Application not found"}, status=404)
+#     def patch(self, request, pk):
+#         try:
+#             application = Application.objects.get(pk=pk)
+#         except Application.DoesNotExist:
+#             return Response({"error": "Application not found"}, status=404)
 
-        status_value = request.data.get("status")
-        message = request.data.get("recruiter_message")
+#         status_value = request.data.get("status")
+#         message = request.data.get("recruiter_message")
 
-        if status_value:
-            application.status = status_value
-        if message:
-            application.recruiter_message = message
+#         if status_value:
+#             application.status = status_value
+#             application.created_at = timezone.now()
+#         if message:
+#             application.recruiter_message = message
 
-        application.save()
-        return Response({"message": "Application updated successfully"})
+#         application.save()
+#         return Response({"message": "Application updated successfully"})
