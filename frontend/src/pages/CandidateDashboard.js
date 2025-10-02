@@ -170,18 +170,90 @@ const CandidateDashboard = () => {
                     <div className="resume-data-label">Name</div>
                     <div className="resume-data-value">{resume.parsed_data.name || "N/A"}</div>
                   </div>
+                  
+                  {resume.parsed_data.contact && (
+                    <>
+                      {resume.parsed_data.contact.email && (
+                        <div className="resume-data-item">
+                          <div className="resume-data-label">Email</div>
+                          <div className="resume-data-value">{resume.parsed_data.contact.email}</div>
+                        </div>
+                      )}
+                      {resume.parsed_data.contact.phone && (
+                        <div className="resume-data-item">
+                          <div className="resume-data-label">Phone</div>
+                          <div className="resume-data-value">{resume.parsed_data.contact.phone}</div>
+                        </div>
+                      )}
+                      {resume.parsed_data.contact.linkedin && (
+                        <div className="resume-data-item">
+                          <div className="resume-data-label">LinkedIn</div>
+                          <div className="resume-data-value">
+                            <a href={resume.parsed_data.contact.linkedin} target="_blank" rel="noopener noreferrer" style={{color: 'var(--primary-color)'}}>
+                              {resume.parsed_data.contact.linkedin}
+                            </a>
+                          </div>
+                        </div>
+                      )}
+                      {resume.parsed_data.contact.github && (
+                        <div className="resume-data-item">
+                          <div className="resume-data-label">GitHub</div>
+                          <div className="resume-data-value">
+                            <a href={resume.parsed_data.contact.github} target="_blank" rel="noopener noreferrer" style={{color: 'var(--primary-color)'}}>
+                              {resume.parsed_data.contact.github}
+                            </a>
+                          </div>
+                        </div>
+                      )}
+                    </>
+                  )}
+
+                  {resume.parsed_data.summary && (
+                    <div className="resume-data-item">
+                      <div className="resume-data-label">Summary</div>
+                      <div className="resume-data-value">{resume.parsed_data.summary}</div>
+                    </div>
+                  )}
+                  
                   <div className="resume-data-item">
                     <div className="resume-data-label">Skills</div>
-                    <div className="resume-data-value">{resume.parsed_data.skills?.join(", ") || "N/A"}</div>
+                    <div className="resume-data-value">
+                      {resume.parsed_data.skills?.length > 0 
+                        ? resume.parsed_data.skills.join(", ") 
+                        : "N/A"}
+                    </div>
                   </div>
+                  
                   <div className="resume-data-item">
                     <div className="resume-data-label">Education</div>
                     <div className="resume-data-value">{resume.parsed_data.education || "N/A"}</div>
                   </div>
+                  
                   <div className="resume-data-item">
                     <div className="resume-data-label">Experience</div>
                     <div className="resume-data-value">{resume.parsed_data.experience || "N/A"}</div>
                   </div>
+
+                  {resume.parsed_data.projects && (
+                    <div className="resume-data-item">
+                      <div className="resume-data-label">Projects</div>
+                      <div className="resume-data-value">{resume.parsed_data.projects}</div>
+                    </div>
+                  )}
+
+                  {resume.parsed_data.certifications && (
+                    <div className="resume-data-item">
+                      <div className="resume-data-label">Certifications</div>
+                      <div className="resume-data-value">{resume.parsed_data.certifications}</div>
+                    </div>
+                  )}
+
+                  {resume.parsed_data.achievements && (
+                    <div className="resume-data-item">
+                      <div className="resume-data-label">Achievements</div>
+                      <div className="resume-data-value">{resume.parsed_data.achievements}</div>
+                    </div>
+                  )}
                 </div>
               ) : (
                 <div className="empty-state">
@@ -202,7 +274,7 @@ const CandidateDashboard = () => {
               {jobs.filter(job => job.applied).length > 0 ? (
                 <div className="job-grid">
                   {jobs.filter(job => job.applied).slice(0, 3).map((job) => (
-                    <div key={job.id} className="notification-card">
+                    <div key={job.id} className="job-card">
                       <div className="job-header">
                         <h4 className="job-title">{job.title}</h4>
                         <p className="job-company">
@@ -269,18 +341,90 @@ const CandidateDashboard = () => {
                     <div className="resume-data-label">Name</div>
                     <div className="resume-data-value">{resume.parsed_data.name || "N/A"}</div>
                   </div>
+                  
+                  {resume.parsed_data.contact && (
+                    <>
+                      {resume.parsed_data.contact.email && (
+                        <div className="resume-data-item">
+                          <div className="resume-data-label">Email</div>
+                          <div className="resume-data-value">{resume.parsed_data.contact.email}</div>
+                        </div>
+                      )}
+                      {resume.parsed_data.contact.phone && (
+                        <div className="resume-data-item">
+                          <div className="resume-data-label">Phone</div>
+                          <div className="resume-data-value">{resume.parsed_data.contact.phone}</div>
+                        </div>
+                      )}
+                      {resume.parsed_data.contact.linkedin && (
+                        <div className="resume-data-item">
+                          <div className="resume-data-label">LinkedIn</div>
+                          <div className="resume-data-value">
+                            <a href={resume.parsed_data.contact.linkedin} target="_blank" rel="noopener noreferrer" style={{color: 'var(--primary-color)'}}>
+                              View Profile
+                            </a>
+                          </div>
+                        </div>
+                      )}
+                      {resume.parsed_data.contact.github && (
+                        <div className="resume-data-item">
+                          <div className="resume-data-label">GitHub</div>
+                          <div className="resume-data-value">
+                            <a href={resume.parsed_data.contact.github} target="_blank" rel="noopener noreferrer" style={{color: 'var(--primary-color)'}}>
+                              View Profile
+                            </a>
+                          </div>
+                        </div>
+                      )}
+                    </>
+                  )}
+
+                  {resume.parsed_data.summary && (
+                    <div className="resume-data-item">
+                      <div className="resume-data-label">Professional Summary</div>
+                      <div className="resume-data-value">{resume.parsed_data.summary}</div>
+                    </div>
+                  )}
+                  
                   <div className="resume-data-item">
                     <div className="resume-data-label">Skills</div>
-                    <div className="resume-data-value">{resume.parsed_data.skills?.join(", ") || "N/A"}</div>
+                    <div className="resume-data-value">
+                      {resume.parsed_data.skills?.length > 0 
+                        ? resume.parsed_data.skills.join(", ") 
+                        : "N/A"}
+                    </div>
                   </div>
+                  
                   <div className="resume-data-item">
                     <div className="resume-data-label">Education</div>
                     <div className="resume-data-value">{resume.parsed_data.education || "N/A"}</div>
                   </div>
+                  
                   <div className="resume-data-item">
-                    <div className="resume-data-label">Experience</div>
+                    <div className="resume-data-label">Work Experience</div>
                     <div className="resume-data-value">{resume.parsed_data.experience || "N/A"}</div>
                   </div>
+
+                  {resume.parsed_data.projects && (
+                    <div className="resume-data-item">
+                      <div className="resume-data-label">Projects</div>
+                      <div className="resume-data-value">{resume.parsed_data.projects}</div>
+                    </div>
+                  )}
+
+                  {resume.parsed_data.certifications && (
+                    <div className="resume-data-item">
+                      <div className="resume-data-label">Certifications</div>
+                      <div className="resume-data-value">{resume.parsed_data.certifications}</div>
+                    </div>
+                  )}
+
+                  {resume.parsed_data.achievements && (
+                    <div className="resume-data-item">
+                      <div className="resume-data-label">Achievements & Awards</div>
+                      <div className="resume-data-value">{resume.parsed_data.achievements}</div>
+                    </div>
+                  )}
                 </div>
               </div>
             )}
@@ -301,7 +445,7 @@ const CandidateDashboard = () => {
               <Search className="search-icon" size={20} />
               <input
                 type="text"
-                placeholder="Search jobs by title, or company..."
+                placeholder="Search jobs by title, company, or skills..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="search-input"
@@ -311,7 +455,7 @@ const CandidateDashboard = () => {
             {filteredJobs.length > 0 ? (
               <div className="job-grid">
                 {filteredJobs.map((job) => (
-                  <div key={job.id} className="notification-card">
+                  <div key={job.id} className="job-card">
                     <div className="job-header">
                       <h4 className="job-title">{job.title}</h4>
                       <p className="job-company">
@@ -430,17 +574,6 @@ const CandidateDashboard = () => {
             </div>
           ))}
         </nav>
-        <div className="sidebar-logout">
-          <div
-            className={`nav-item logout-nav-item${sidebarCollapsed ? " collapsed" : ""}`}
-            onClick={handleLogout}
-            title="Logout"
-            style={{ color: "var(--danger)" }}
-          >
-            <LogOut className="nav-icon" />
-            {!sidebarCollapsed && <span className="nav-text">Logout</span>}
-          </div>
-        </div>
       </aside>
 
       {/* Main Content */}
@@ -471,6 +604,12 @@ const CandidateDashboard = () => {
           {renderSection()}
         </div>
       </main>
+
+      {/* Logout Button */}
+      <button onClick={handleLogout} className="logout-btn">
+        <LogOut size={18} />
+        Logout
+      </button>
     </div>
   );
 };
